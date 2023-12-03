@@ -1,9 +1,25 @@
 {
   "name": "@documente/documente",
   "version": "1.0.0-beta.0",
+  "description": "A literate testing framework to generate automated tests from documentation files",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/documente/documente.git"
+  },
+  "keywords": [
+    "documentation",
+    "testing",
+    "literate",
+    "bdd",
+    "tdd",
+    "e2e"
+  ],
   "main": "src/index.js",
   "author": "pckerneis",
-  "license": "MIT",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "documente": "bin/index.js"
   },
