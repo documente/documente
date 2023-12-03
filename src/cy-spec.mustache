@@ -1,11 +1,11 @@
-import { withContext } from '@documente/phrase';
-import externals from '{{{pathToExternals}}}';
+import { withContext } from '@documente/phrase';{{#pathToExternals}}
+import externals from '{{{.}}}';{{/pathToExternals}}
 
 const selectorTree = `
 {{{selectorTree}}}
 `;
 
-const { test, add } = withContext(selectorTree, externals);
+const { test, add } = withContext(selectorTree, {{#pathToExternals}}externals{{/pathToExternals}}{{^pathToExternals}}{}{{/pathToExternals}});
 
 {{#blocks}}
 add `

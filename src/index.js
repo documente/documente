@@ -14,7 +14,7 @@ function importConfigFile() {
 }
 
 function extractFromConfig(config) {
-  const { selectors, externals, input, outputDir } = config;
+  let { selectors, externals, input, outputDir } = config;
 
   let inputArray;
 
@@ -27,14 +27,16 @@ function extractFromConfig(config) {
   }
 
   if (typeof selectors !== 'string') {
-    throw new Error('selectors must be a string path to a yaml file');
+    throw new Error('selectors must be a string path to a YAML file');
   }
 
-  if (typeof externals !== 'string') {
-    throw new Error('externals must be a string path to a js file');
+  if (externals != null && typeof externals !== 'string') {
+    throw new Error('externals must be a string path to a Javascript file');
   }
 
-  if (typeof outputDir !== 'string') {
+  if (outputDir == null) {
+    outputDir = 'cypress/e2e';
+  } else if (typeof outputDir !== 'string') {
     throw new Error('outputDir must be a string path to a directory');
   }
 
@@ -72,6 +74,10 @@ function importExternals(pathToExternals) {
 }
 
 function checkExternalsImport(pathToExternals) {
+  if (pathToExternals == null) {
+    return;
+  }
+
   const importedExternals = importExternals(pathToExternals);
 
   if (typeof importedExternals !== 'object') {
@@ -100,10 +106,9 @@ function run() {
   const { selectors, externals, outputDir, inputArray } =
     extractFromConfig(config);
   checkExternalsImport(externals);
-  const outputPathToExternals = relative(
-    resolve(outputDir),
-    resolve(externals),
-  ).replace(/\\/g, '/');
+  const outputPathToExternals = externals == null ?
+      null :
+      relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseSelectorsFile(selectors);
   const files = validateInputFiles(inputArray);
   const cySpecTemplate = fs.readFileSync(
@@ -141,6 +146,7 @@ function run() {
       specs,
       blocks,
     };
+
     const rendered = Mustache.render(cySpecTemplate, view);
     const outputFileName = `${sourceFileName.replace(
       /\.md$/,
