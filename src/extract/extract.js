@@ -5,6 +5,18 @@ const glob = require('glob').globSync;
 const Mustache = require('mustache');
 const { Splitter } = require('@documente/phrase');
 
+const supportedRunners = ['cypress', 'playwright'];
+
+const defaultOutputDirs = {
+  cypress: 'cypress/e2e',
+  playwright: 'playwright/tests',
+}
+
+const defaultExtensions = {
+  cypress: '.cy.js',
+  playwright: '.spec.js',
+}
+
 function importConfigFile() {
   try {
     return require(resolve(process.cwd(), 'documenté.config'));
@@ -14,7 +26,7 @@ function importConfigFile() {
 }
 
 function extractFromConfig(config) {
-  let { selectors, externals, input, outputDir } = config;
+  let { selectors, externals, input, outputDir, runner } = config;
 
   let inputArray;
 
@@ -34,13 +46,17 @@ function extractFromConfig(config) {
     throw new Error('externals must be a string path to a Javascript file');
   }
 
+  if (!supportedRunners.includes(runner)) {
+    throw new Error(`runner must be one of ${supportedRunners.join(', ')}`);
+  }
+
   if (outputDir == null) {
-    outputDir = 'cypress/e2e';
+    outputDir = defaultOutputDirs[runner];
   } else if (typeof outputDir !== 'string') {
     throw new Error('outputDir must be a string path to a directory');
   }
 
-  return { selectors, externals, outputDir, inputArray };
+  return { selectors, externals, outputDir, inputArray, runner };
 }
 
 function readSelectorsFile(pathToSelectorsFile) {
@@ -103,7 +119,7 @@ function validateInputFiles(inputGlobArray) {
 
 function run() {
   const config = importConfigFile();
-  const { selectors, externals, outputDir, inputArray } =
+  const { selectors, externals, outputDir, inputArray, runner } =
     extractFromConfig(config);
   checkExternalsImport(externals);
   const outputPathToExternals = externals == null ?
@@ -111,10 +127,12 @@ function run() {
       relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseSelectorsFile(selectors);
   const files = validateInputFiles(inputArray);
-  const cySpecTemplate = fs.readFileSync(
-    resolve(__dirname, 'cy-spec.mustache'),
+  const specTemplate = fs.readFileSync(
+    resolve(__dirname, `../templates/${runner}-spec.mustache`),
     'utf8',
   );
+
+  fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
 
   function processDocumentationFile(file) {
     const splitter = new Splitter();
@@ -127,9 +145,7 @@ function run() {
       .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
-
     const blocks = splitResult.blocks.map((block) => ({ block }));
-
     const specs = splitResult.tests.map((spec, index) => ({
       spec,
       specNumber: index + 1,
@@ -147,22 +163,22 @@ function run() {
       blocks,
     };
 
-    const rendered = Mustache.render(cySpecTemplate, view);
+    const rendered = Mustache.render(specTemplate, view);
     const outputFileName = `${sourceFileName.replace(
       /\.md$/,
       '',
-    )}.generated.cy.js`;
+    )}${defaultExtensions[runner]}`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
-      `Generated ${specs.length} Cypress tests in ${pathToOutputFile}.`,
+      `Generated ${specs.length} tests in ${pathToOutputFile}.`,
     );
   }
 
   files.forEach((file) => processDocumentationFile(file));
 
   console.log(
-    `Generated ${files.length} Cypress spec files in ${resolve(
+    `Generated ${files.length} spec files in ${resolve(
       process.cwd(),
       outputDir,
     )}.`,

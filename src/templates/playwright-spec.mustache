@@ -1,0 +1,24 @@
+import { expect, test } from '@playwright/test';
+import { PlaywrightRunner } from '@documente/documente';{{#pathToExternals}}
+import externals from '{{{.}}}';{{/pathToExternals}}
+
+const selectorTree = `
+{{{selectorTree}}}
+`;
+
+const testRunner = new PlaywrightRunner(selectorTree, {{#pathToExternals}}externals{{/pathToExternals}}{{^pathToExternals}}{}{{/pathToExternals}});
+
+{{#blocks}}
+testRunner.add(`
+{{{block}}}`);
+
+{{/blocks}}
+
+{{#specs}}
+test('spec #{{specNumber}}', async ({ page }) => {
+  await testRunner.run(`
+{{{spec}}}
+`, page, expect);
+});
+
+{{/specs}}
