@@ -1,2 +1,2 @@
 #! /usr/bin/env node
-require('../src/index.js').default(process.argv.slice(2));
+require('../src/extract/extract.js').default(process.argv.slice(2));

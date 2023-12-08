@@ -1,0 +1,24 @@
+import { CypressRunner } from '@documente/documente';{{#pathToExternals}}
+import externals from '{{{.}}}';{{/pathToExternals}}
+
+const selectorTree = `
+{{{selectorTree}}}
+`;
+
+const testRunner = new CypressRunner(selectorTree, {{#pathToExternals}}externals{{/pathToExternals}}{{^pathToExternals}}{}{{/pathToExternals}});
+
+{{#blocks}}
+testRunner.add(`
+{{{block}}}`);
+
+{{/blocks}}
+
+describe('specs from {{{sourceFileName}}}', () => {
+{{#specs}}
+  it('spec #{{specNumber}}', () => {
+    testRunner.run(`
+{{{spec}}}`);
+  });
+
+{{/specs}}
+});
