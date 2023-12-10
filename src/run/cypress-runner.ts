@@ -7,7 +7,7 @@ import {
   normalizeEOL,
   SelectorTree,
   SystemLevelInstruction,
-  validateContext
+  validateContext,
 } from '@documente/phrase';
 import YAML from 'yaml';
 
@@ -17,7 +17,10 @@ export class CypressRunner {
   fragments: string[];
 
   constructor(selectorTree: string | SelectorTree, externals: Externals = {}) {
-    this.selectorTree = typeof selectorTree === 'string' ? YAML.parse(selectorTree) : selectorTree;
+    this.selectorTree =
+      typeof selectorTree === 'string'
+        ? YAML.parse(selectorTree)
+        : selectorTree;
     this.externals = externals;
     this.fragments = [];
     validateContext(this.selectorTree, this.externals);
@@ -30,8 +33,12 @@ export class CypressRunner {
   run(str: string) {
     str = normalizeEOL(str) + '\n' + this.fragments.join('\n');
 
-    const instructions = buildInstructions(str, this.selectorTree, this.externals);
-    instructions.forEach(instruction => {
+    const instructions = buildInstructions(
+      str,
+      this.selectorTree,
+      this.externals,
+    );
+    instructions.forEach((instruction) => {
       if (instruction.kind === 'system-level') {
         this.runSystemLevel(instruction);
       } else if (instruction.kind === 'builtin-action') {
@@ -62,7 +69,7 @@ export class CypressRunner {
    * @param {Object} actionInstruction - The action instruction.
    */
   runAction(actionInstruction: BuiltInActionInstruction) {
-    const {selectors, action, args} = actionInstruction;
+    const { selectors, action, args } = actionInstruction;
 
     switch (action) {
       case 'type':
@@ -130,7 +137,7 @@ export class CypressRunner {
    * @throws {Error} If the target selectors are not defined or the assertion is unknown.
    */
   runBuiltInAssertion(assertion: BuiltInAssertion) {
-    const {selectors, args, code} = assertion;
+    const { selectors, args, code } = assertion;
 
     if (!selectors) {
       throw new Error('Target selectors are required for built-in assertions.');

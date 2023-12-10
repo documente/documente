@@ -6,11 +6,11 @@ import {
   normalizeEOL,
   SelectorTree,
   SystemLevelInstruction,
-  validateContext
+  validateContext,
 } from '@documente/phrase';
 import YAML from 'yaml';
-import {Expect} from 'playwright/test';
-import {Page} from 'playwright';
+import { Expect } from 'playwright/test';
+import { Page } from 'playwright';
 
 export class PlaywrightRunner {
   selectorTree: SelectorTree;
@@ -18,7 +18,10 @@ export class PlaywrightRunner {
   fragments: string[];
 
   constructor(selectorTree: string | SelectorTree, externals: Externals = {}) {
-    this.selectorTree = typeof selectorTree === 'string' ? YAML.parse(selectorTree) : selectorTree;
+    this.selectorTree =
+      typeof selectorTree === 'string'
+        ? YAML.parse(selectorTree)
+        : selectorTree;
     this.externals = externals;
     this.fragments = [];
     validateContext(this.selectorTree, this.externals);
@@ -31,7 +34,11 @@ export class PlaywrightRunner {
   async run(str: string, page: Page, expect: Expect) {
     str = normalizeEOL(str) + '\n' + this.fragments.join('\n');
 
-    const instructions = buildInstructions(str, this.selectorTree, this.externals);
+    const instructions = buildInstructions(
+      str,
+      this.selectorTree,
+      this.externals,
+    );
 
     for (const instruction of instructions) {
       if (instruction.kind === 'system-level') {
@@ -53,7 +60,7 @@ export class PlaywrightRunner {
   }
 
   async runAction(actionInstruction: BuiltInActionInstruction, page: Page) {
-    const {selectors, action, args} = actionInstruction;
+    const { selectors, action, args } = actionInstruction;
 
     switch (action) {
       case 'type':
@@ -98,10 +105,12 @@ export class PlaywrightRunner {
     }
   }
 
-  async runBuiltInAssertion(assertion: BuiltInAssertion,
-                            page: Page,
-                            expect: Expect) {
-    const {selectors, args, code} = assertion;
+  async runBuiltInAssertion(
+    assertion: BuiltInAssertion,
+    page: Page,
+    expect: Expect,
+  ) {
+    const { selectors, args, code } = assertion;
 
     if (!selectors) {
       throw new Error('Target selectors are required for built-in assertions.');
@@ -121,7 +130,9 @@ export class PlaywrightRunner {
         await expect(page.locator(selectors.join(' '))).toHaveText(args[0]);
         break;
       case 'have occurrences':
-        await expect(page.locator(selectors.join(' '))).toHaveCount(Number(args[0]));
+        await expect(page.locator(selectors.join(' '))).toHaveCount(
+          Number(args[0]),
+        );
         break;
       default:
         throw new Error(`Unknown assertion code: ${code}`);

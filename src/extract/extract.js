@@ -1,25 +1,32 @@
-const fs = require('fs');
-const { parse } = require('yaml');
-const { basename, resolve, relative } = require('path');
-const glob = require('glob').globSync;
-const Mustache = require('mustache');
-const { Splitter } = require('@documente/phrase');
+import fs from 'fs';
+import { parse } from 'yaml';
+import { basename, dirname, resolve, relative } from 'path';
+import { globSync as glob } from 'glob';
+import Mustache from 'mustache';
+import { Splitter } from '@documente/phrase';
+import { fileURLToPath } from 'node:url';
+import chalk from 'chalk';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const supportedRunners = ['cypress', 'playwright'];
 
 const defaultOutputDirs = {
   cypress: 'cypress/e2e',
-  playwright: 'playwright/tests',
-}
+  playwright: 'tests',
+};
 
 const defaultExtensions = {
   cypress: '.cy.js',
   playwright: '.spec.js',
-}
+};
 
-function importConfigFile() {
+function importConfigFile(pathToConfigFile) {
   try {
-    return require(resolve(process.cwd(), 'documenté.config'));
+    return parse(
+      fs.readFileSync(resolve(process.cwd(), pathToConfigFile), 'utf8'),
+    );
   } catch (e) {
     throw new Error(`Error importing config file: ${e.message}`);
   }
@@ -81,26 +88,6 @@ function readAndParseSelectorsFile(pathToSelectorsFile) {
   return selectorsFileContent;
 }
 
-function importExternals(pathToExternals) {
-  try {
-    return require(resolve(process.cwd(), pathToExternals));
-  } catch (e) {
-    throw new Error(`Error importing externals file: ${e.message}`);
-  }
-}
-
-function checkExternalsImport(pathToExternals) {
-  if (pathToExternals == null) {
-    return;
-  }
-
-  const importedExternals = importExternals(pathToExternals);
-
-  if (typeof importedExternals !== 'object') {
-    throw new Error('Externals file must export an object');
-  }
-}
-
 function getInputFiles(inputGlobArray) {
   return glob(inputGlobArray, {
     cwd: process.cwd(),
@@ -117,14 +104,27 @@ function validateInputFiles(inputGlobArray) {
   return files;
 }
 
-function run() {
-  const config = importConfigFile();
+function checkExternals(pathToExternals) {
+  if (pathToExternals == null) {
+    return;
+  }
+
+  try {
+    fs.accessSync(resolve(process.cwd(), pathToExternals), fs.constants.R_OK);
+  } catch (e) {
+    throw new Error(`Error reading externals file: ${e.message}`);
+  }
+}
+
+export default function run(pathToConfigFile) {
+  const config = importConfigFile(pathToConfigFile);
   const { selectors, externals, outputDir, inputArray, runner } =
     extractFromConfig(config);
-  checkExternalsImport(externals);
-  const outputPathToExternals = externals == null ?
-      null :
-      relative(outputDir, externals).replace(/\\/g, '/');
+  checkExternals(externals);
+  const outputPathToExternals =
+    externals == null
+      ? null
+      : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseSelectorsFile(selectors);
   const files = validateInputFiles(inputArray);
   const specTemplate = fs.readFileSync(
@@ -164,25 +164,24 @@ function run() {
     };
 
     const rendered = Mustache.render(specTemplate, view);
-    const outputFileName = `${sourceFileName.replace(
-      /\.md$/,
-      '',
-    )}${defaultExtensions[runner]}`;
+    const outputFileName = `${sourceFileName.replace(/\.md$/, '')}${
+      defaultExtensions[runner]
+    }`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
-      `Generated ${specs.length} tests in ${pathToOutputFile}.`,
+      chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
     );
   }
 
   files.forEach((file) => processDocumentationFile(file));
 
   console.log(
-    `Generated ${files.length} spec files in ${resolve(
-      process.cwd(),
-      outputDir,
-    )}.`,
+    chalk.green(
+      `Generated ${files.length} spec files in ${resolve(
+        process.cwd(),
+        outputDir,
+      )}.`,
+    ),
   );
 }
-
-exports.default = run;

@@ -63,7 +63,7 @@ module.exports = {
   selectors: 'documenté/selectors.yaml',
   // (Optional) The path to a Javascript file containing external functions
   externals: 'documenté/externals.js',
-}
+};
 ```
 
 ### Writing specifications
@@ -132,7 +132,7 @@ You can find an example repository [here](https://github.com/documente/example-s
 
 ## Contributing
 
-Any contributions you make are *greatly appreciated*.
+Any contributions you make are _greatly appreciated_.
 
 For suggestions and improvements, feel free to fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 
