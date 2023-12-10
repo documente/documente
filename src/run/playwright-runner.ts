@@ -82,11 +82,20 @@ export class PlaywrightRunner {
         }
         break;
       case 'clear':
-        throw new Error(`Not implemented action ${action}.`);
+        if (this.targetIsDefined(selectors, action)) {
+          await page.locator(selectors.join(' ')).clear()
+        }
+        break;
       case 'double_click':
-        throw new Error(`Not implemented action ${action}.`);
+        if (this.targetIsDefined(selectors, action)) {
+          await page.locator(selectors.join(' ')).dblclick();
+        }
+        break;
       case 'right_click':
-        throw new Error(`Not implemented action ${action}.`);
+        if (this.targetIsDefined(selectors, action)) {
+          await page.locator(selectors.join(' ')).click({ button: 'right' });
+        }
+        break;
       case 'scroll':
         throw new Error(`Not implemented action ${action}.`);
       case 'uncheck':
@@ -95,11 +104,16 @@ export class PlaywrightRunner {
         }
         break;
       case 'select':
-        throw new Error(`Not implemented action ${action}.`);
+        if (this.targetIsDefined(selectors, action)) {
+          await page.locator(selectors.join(' ')).selectOption(args[0]);
+        }
+        break;
       case 'go_back':
-        throw new Error(`Not implemented action ${action}.`);
+        await page.goBack();
+        break;
       case 'go_forward':
-        throw new Error(`Not implemented action ${action}.`);
+        await page.goForward();
+        break;
       default:
         throw new Error(`Unknown action: ${action}`);
     }
@@ -133,6 +147,24 @@ export class PlaywrightRunner {
         await expect(page.locator(selectors.join(' '))).toHaveCount(
           Number(args[0]),
         );
+        break;
+      case 'contain text':
+        await expect(page.locator(selectors.join(' '))).toContainText(args[0]);
+        break;
+      case 'have value':
+        await expect(page.locator(selectors.join(' '))).toHaveValue(args[0]);
+        break;
+      case 'be checked':
+        await expect(page.locator(selectors.join(' '))).toBeChecked();
+        break;
+      case 'be unchecked':
+        await expect(page.locator(selectors.join(' '))).not.toBeChecked();
+        break;
+      case 'be disabled':
+        await expect(page.locator(selectors.join(' '))).toBeDisabled();
+        break;
+      case 'be enabled':
+        await expect(page.locator(selectors.join(' '))).toBeEnabled();
         break;
       default:
         throw new Error(`Unknown assertion code: ${code}`);
