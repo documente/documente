@@ -28,6 +28,7 @@
   },
   "files": [
     "src/extract/**/*",
+    "src/templates/**/*",
     "dist"
   ],
   "scripts": {
