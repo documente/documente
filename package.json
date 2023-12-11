@@ -1,6 +1,6 @@
 {
   "name": "@documente/documente",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "A literate testing framework to generate automated tests from documentation files",
   "repository": {
     "type": "git",
