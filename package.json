@@ -27,6 +27,7 @@
     "documente": "bin/index.js"
   },
   "files": [
+    "src/extract/**/*",
     "dist"
   ],
   "scripts": {
