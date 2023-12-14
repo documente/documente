@@ -108,7 +108,7 @@ done
 ```
 ````
 
-You can place the specifications in any folder you want, as long as you specify the correct path in the `input` property of the `documente.config.js` file.
+You can place the specifications in any folder you want, as long as you specify the correct path in the `input` property of the `documente.config.yml` file.
 A good practice is to place the specifications in a `docs` folder at the root of your project.
 
 Take a look at the [Phrasé repository](https://github.com/documente/phrase) for more information about the test syntax.
