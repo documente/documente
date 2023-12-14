@@ -2,8 +2,9 @@
 
 > A literate testing framework to generate automated tests from documentation files
 
-It is based on [Cypress](https://www.cypress.io/) and builds on concepts from [Behaviour-Driven-Development](https://en.wikipedia.org/wiki/Behavior-driven_development)
-and [literate programming](https://en.wikipedia.org/wiki/Literate_programming).
+Documenté is a framework for writing executable specifications for web applications.
+
+It integrates into test frameworks such as [Cypress](https://www.cypress.io/) or [Playwright](https://playwright.dev/), and builds on concepts from [Behaviour-Driven-Development](https://en.wikipedia.org/wiki/Behavior-driven_development) and [literate programming](https://en.wikipedia.org/wiki/Literate_programming).
 
 ## Why Documenté?
 
@@ -27,7 +28,7 @@ Specification issues are also easier to spot and fix, as they are located in the
 
 ### Prerequisites
 
-If you don't have Cypress installed, follow the [Cypress installation instructions](https://docs.cypress.io/guides/getting-started/installing-cypress).
+Documenté integrates into projects with a end-to-end testing framework installed. You can refer to [Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress) or [Playwright](https://playwright.dev/docs/intro) installation instructions to get started.
 
 ### Installation
 
@@ -51,19 +52,31 @@ npm install --global @documente/documente
 
 ### Configuration
 
-Create a `documente.config.js` file at the root of your project:
+Create a `documente.config.yml` file at the root of your project:
 
-```js
-module.exports = {
-  // A path or an array of globs pointing to the documentation files to extract the specifications from
-  input: 'docs/**/*.md',
-  // The path to the folder where the specifications will be written. Defaults to 'cypress/e2e'
-  outputDir: 'cypress/e2e',
-  // The path to a YAML file containing the selectors
-  selectors: 'documenté/selectors.yaml',
-  // (Optional) The path to a Javascript file containing external functions
-  externals: 'documenté/externals.js',
-};
+```yaml
+runner: playwright                  # either "playwright" or "cypress"
+input: docs/**/*.md                 # location of documentation to extract tests from
+outputDir: tests                    # directory in which tests should be generated
+selectors: documente/selectors.yaml # path to selectors file
+```
+
+### Describing your application with a selectors file
+
+Documenté expects a YAML file with a tree-like representation of your application.
+
+Here is an example selectors file, describing a login form containing a login field, a password field and a confirm button, as well as error and welcome message containers.
+
+Documenté uses the [standard HTML5 selectors](https://drafts.csswg.org/selectors/) which allow you to locate HTML elements by type, class, ID, attribute...
+
+```yaml
+login form:
+  _selector: .login-form
+  login field: input[type="text"]
+  password field: input[type="password"]
+  confirm button: button[type="submit"]
+login error message: .error-message
+welcome message: .welcome-message
 ```
 
 ### Writing specifications
@@ -110,20 +123,22 @@ To extract the specifications from the documentation files, run `documente` from
 documente
 ```
 
-This will generate Cypress test files in the output folder.
+This will generate test files in the output folder.
 
 ### Running the tests
 
-To run the tests, use the Cypress CLI:
+You can run the tests just like you would run other Cypress or Playwright tests.
 
-```bash
-cypress run
-```
-
-Or the Cypress GUI:
+With Cypress:
 
 ```bash
 cypress open
+```
+
+Or with Playwright:
+
+```bash
+playwright test --ui
 ```
 
 ## Example project
