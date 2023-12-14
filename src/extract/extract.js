@@ -22,6 +22,31 @@ const defaultExtensions = {
   playwright: '.spec.js',
 };
 
+// Starting from the current working directory, look for a config file named "documente.config.yml"
+// or "documente.config.yaml". While config file is not found, go up one directory and repeat.
+function findConfigFile() {
+  let currentDirectory = process.cwd();
+
+  while (currentDirectory !== '/') {
+    const configFiles = glob(
+      ['documente.config.yml', 'documente.config.yaml'],
+      {
+        cwd: currentDirectory,
+      },
+    );
+
+    if (configFiles.length > 0) {
+      const found = resolve(currentDirectory, configFiles[0]);
+      console.log('Using config file:', found);
+      return found;
+    }
+
+    currentDirectory = dirname(currentDirectory);
+  }
+
+  throw new Error('No config file found');
+}
+
 function importConfigFile(pathToConfigFile) {
   try {
     return parse(
@@ -117,6 +142,9 @@ function checkExternals(pathToExternals) {
 }
 
 export default function run(pathToConfigFile) {
+  if (pathToConfigFile == null) {
+    pathToConfigFile = findConfigFile();
+  }
   const config = importConfigFile(pathToConfigFile);
   const { selectors, externals, outputDir, inputArray, runner } =
     extractFromConfig(config);
