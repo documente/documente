@@ -1,6 +1,6 @@
 import fs from 'fs';
-import { parse } from 'yaml';
-import { basename, dirname, resolve, relative } from 'path';
+import YAML from 'yaml';
+import { basename, dirname, resolve, relative, parse } from 'path';
 import { globSync as glob } from 'glob';
 import Mustache from 'mustache';
 import { Splitter } from '@documente/phrase';
@@ -51,7 +51,7 @@ function findConfigFile() {
 
 function importConfigFile(pathToConfigFile) {
   try {
-    return parse(
+    return YAML.parse(
       fs.readFileSync(resolve(process.cwd(), pathToConfigFile), 'utf8'),
     );
   } catch (e) {
@@ -113,7 +113,7 @@ function readAndParseSelectorsFile(pathToSelectorsFile) {
   const selectorsFileContent = readSelectorsFile(pathToSelectorsFile);
 
   try {
-    parse(selectorsFileContent);
+    YAML.parse(selectorsFileContent);
   } catch (e) {
     throw new Error(`Error parsing selectors file: ${e.message}`);
   }
@@ -208,9 +208,8 @@ export default function run(pathToConfigFile) {
     };
 
     const rendered = Mustache.render(specTemplate, view);
-    const outputFileName = `${sourceFileName.replace(/\.md$/, '')}${
-        defaultExtensions[runner]
-    }`;
+    const withoutExt = parse(sourceFileName).name;
+    const outputFileName = `${withoutExt}${defaultExtensions[runner]}`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
