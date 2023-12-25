@@ -97,7 +97,10 @@ export class PlaywrightRunner {
         }
         break;
       case 'scroll':
-        throw new Error(`Not implemented action ${action}.`);
+        if (this.targetIsDefined(selectors, action)) {
+          await page.locator(selectors.join(' ')).scrollIntoViewIfNeeded();
+        }
+        break;
       case 'uncheck':
         if (this.targetIsDefined(selectors, action)) {
           await page.locator(selectors.join(' ')).uncheck();
