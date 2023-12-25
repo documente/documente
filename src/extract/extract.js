@@ -10,6 +10,8 @@ import chalk from 'chalk';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const defaultRegex = '```phras[ée]([^`]*)```';
+
 const supportedRunners = ['cypress', 'playwright'];
 
 const defaultOutputDirs = {
@@ -58,7 +60,7 @@ function importConfigFile(pathToConfigFile) {
 }
 
 function extractFromConfig(config) {
-  let { selectors, externals, input, outputDir, runner } = config;
+  let { selectors, externals, input, outputDir, runner, testRegex } = config;
 
   let inputArray;
 
@@ -88,7 +90,13 @@ function extractFromConfig(config) {
     throw new Error('outputDir must be a string path to a directory');
   }
 
-  return { selectors, externals, outputDir, inputArray, runner };
+  if (testRegex == null) {
+    testRegex = defaultRegex;
+  } else if (typeof testRegex !== 'string') {
+    throw new Error('testRegex must be a string');
+  }
+
+  return { selectors, externals, outputDir, inputArray, runner, testRegex };
 }
 
 function readSelectorsFile(pathToSelectorsFile) {
@@ -146,7 +154,7 @@ export default function run(pathToConfigFile) {
     pathToConfigFile = findConfigFile();
   }
   const config = importConfigFile(pathToConfigFile);
-  const { selectors, externals, outputDir, inputArray, runner } =
+  const { selectors, externals, outputDir, inputArray, runner, testRegex } =
     extractFromConfig(config);
   checkExternals(externals);
   const outputPathToExternals =
@@ -162,15 +170,23 @@ export default function run(pathToConfigFile) {
 
   fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
 
-  function processDocumentationFile(file) {
+  let generatedFileCount = 0;
+
+  files.forEach((file) => {
     const splitter = new Splitter();
     const sourceFileName = basename(file);
     const fileContent = fs.readFileSync(resolve(process.cwd(), file), 'utf8');
-    const regex = /```phras[ée][^`]*```/gm;
-    fileContent
-      .match(regex)
-      .map((block) => block.replace(/```phras[ée]([^`]*)```/, '$1').trim())
-      .forEach((block) => splitter.add(block));
+    const regex = new RegExp(testRegex, 'gm');
+    const matches = fileContent.match(regex);
+
+    if (matches == null || matches.length === 0) {
+      console.log(chalk.yellow(`No test found in ${file}`));
+      return;
+    }
+
+    matches
+        .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
+        .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
     const blocks = splitResult.blocks.map((block) => ({ block }));
@@ -193,20 +209,19 @@ export default function run(pathToConfigFile) {
 
     const rendered = Mustache.render(specTemplate, view);
     const outputFileName = `${sourceFileName.replace(/\.md$/, '')}${
-      defaultExtensions[runner]
+        defaultExtensions[runner]
     }`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
-      chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
+        chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
     );
-  }
-
-  files.forEach((file) => processDocumentationFile(file));
+    generatedFileCount++;
+  });
 
   console.log(
     chalk.green(
-      `Generated ${files.length} spec files in ${resolve(
+      `Generated ${generatedFileCount} spec files in ${resolve(
         process.cwd(),
         outputDir,
       )}.`,
