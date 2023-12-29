@@ -11,6 +11,24 @@ import {
 } from '@documente/phrase';
 import YAML from 'yaml';
 
+// TODO: include actual types from cypress without importing the whole package
+declare const cy: {
+  visit: (url: string) => void;
+  go: (direction: 'back' | 'forward') => void;
+  get: (selector: string) => {
+    type: (text: string) => void;
+    click: () => void;
+    check: () => void;
+    clear: () => void;
+    dblclick: () => void;
+    rightclick: () => void;
+    scrollIntoView: () => void;
+    uncheck: () => void;
+    select: (text: string) => void;
+    should: (chainer: string, ...args: string[]) => void;
+  };
+};
+
 export class CypressRunner {
   selectorTree: SelectorTree;
   externals: Externals;
