@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "Documenté",
+  base: "/documente/",
   description: "A literate testing framework to generate automated tests from documentation files",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
