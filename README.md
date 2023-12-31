@@ -1,6 +1,16 @@
-# Documenté
+<p align="center">
+    <a href="https://github.com/documente/documente">
+        <img alt="Logo for the Documenté literate testing framework" src="docs/public/logo.svg" title="Documenté logo" width="200"/>
+    </a>
+</p>
 
-> A literate testing framework to generate automated tests from documentation files
+<h3 align="center">Welcome to Documenté</h3>
+
+<p align="center">
+The literate testing framework
+</p>
+
+## Overview
 
 Documenté is a framework for writing executable specifications for web applications.
 
