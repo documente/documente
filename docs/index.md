@@ -6,6 +6,9 @@ hero:
   name: "Documenté"
   text: "The literate testing framework"
   tagline:  Generate automated tests from user documentation
+  image:
+    src: ./background.png
+    alt: Documenté logo
   actions:
     - theme: brand
       text: Get Started
