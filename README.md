@@ -7,7 +7,7 @@
 <h3 align="center">Welcome to Documenté</h3>
 
 <p align="center">
-The literate testing framework
+The Javascript literate testing framework
 </p>
 
 ## What is Documenté?
