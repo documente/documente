@@ -7,6 +7,7 @@ export default defineConfig({
   description: "A literate testing framework to generate automated tests from documentation files",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: '/logo.svg',
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide' },

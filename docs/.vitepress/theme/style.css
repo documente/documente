@@ -103,12 +103,12 @@
     #4dfa9880 50%,
     #55f62a80 50%
   );
-  --vp-home-hero-image-filter: blur(44px);
+  --vp-home-hero-image-filter: blur(96px);
 }
 
 @media (min-width: 640px) {
   :root {
-    --vp-home-hero-image-filter: blur(56px);
+    --vp-home-hero-image-filter: blur(96px);
   }
 }
 
@@ -116,6 +116,10 @@
   :root {
     --vp-home-hero-image-filter: blur(68px);
   }
+}
+
+.VPHero .image img {
+    max-width: 380px;
 }
 
 /**
