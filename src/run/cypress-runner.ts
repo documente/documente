@@ -185,7 +185,7 @@ const knownChainer: Record<BuiltinAssertionCode, string> = {
   exist: 'exist',
   'not exist': 'not.exist',
   'be checked': 'be.checked',
-  'be unchecked': 'be.unchecked',
+  'be unchecked': 'not.be.checked',
   'be disabled': 'be.disabled',
   'be enabled': 'be.enabled',
   'have occurrences': 'have.length',
