@@ -154,6 +154,9 @@ export class PlaywrightRunner {
       case 'contain text':
         await expect(page.locator(selectors.join(' '))).toContainText(args[0]);
         break;
+      case 'have class':
+        await expect(page.locator(selectors.join(' '))).toHaveClass(args[0]);
+        break;
       case 'have value':
         await expect(page.locator(selectors.join(' '))).toHaveValue(args[0]);
         break;
