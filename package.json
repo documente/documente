@@ -35,10 +35,7 @@
     "start": "node src/extract.js",
     "prettier": "prettier --write .",
     "build": "tsup src/run/index.ts --format cjs,esm --dts --clean",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "prepublishOnly": "npm run build && npm run docs:build"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@documente/phrase": "^1.0.0-beta.12",
