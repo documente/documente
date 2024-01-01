@@ -143,6 +143,9 @@ export class PlaywrightRunner {
       case 'be visible':
         await expect(page.locator(selectors.join(' '))).toBeVisible();
         break;
+      case 'be hidden':
+        await expect(page.locator(selectors.join(' '))).toBeHidden();
+        break;
       case 'have text':
         await expect(page.locator(selectors.join(' '))).toHaveText(args[0]);
         break;

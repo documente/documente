@@ -179,6 +179,7 @@ export class CypressRunner {
 const knownChainer: Record<BuiltinAssertionCode, string> = {
   'have text': 'have.text',
   'be visible': 'be.visible',
+  'be hidden': 'be.hidden',
   'contain text': 'contain.text',
   'have value': 'have.value',
   'have class': 'have.class',
