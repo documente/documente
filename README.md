@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/documente/documente">
-        <img alt="Logo for the Documenté literate testing framework" src="docs/public/logo.svg" title="Documenté logo" width="200"/>
+        <img alt="Logo for the Documenté literate testing framework" src="https://github.com/documente/documente.github.io/raw/main/public/logo.svg" title="Documenté logo" width="200"/>
     </a>
 </p>
 
