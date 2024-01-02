@@ -104,7 +104,6 @@ Login into the application to be greeted by a cool welcome message.
 when I login
 then welcome message should be visible
 and it should have text "Welcome, user01!"
-done
 ```
 
 In order to login, simply type your username and password in the login form and click on the login button.
@@ -114,7 +113,6 @@ In order to login:
 - I type "user01" on login form login field
 - I type "password" on password field
 - I click on login form confirm button
-done
 ```
 ````
 
