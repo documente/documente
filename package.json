@@ -32,7 +32,6 @@
     "dist"
   ],
   "scripts": {
-    "start": "node src/extract.js",
     "prettier": "prettier --write .",
     "build": "tsup src/run/index.ts --format cjs,esm --dts --clean",
     "prepublishOnly": "npm run build"
