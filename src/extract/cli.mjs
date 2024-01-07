@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import PACKAGE_VERSION from './package-version.cjs';
-import run from './extract.js';
+import run from './extract.mjs';
 import chalk from 'chalk';
 
 const program = new Command();

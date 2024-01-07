@@ -24,7 +24,7 @@
   },
   "type": "module",
   "bin": {
-    "documente": "bin/index.js"
+    "documente": "bin/index.mjs"
   },
   "files": [
     "src/extract/**/*",
