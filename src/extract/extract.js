@@ -103,23 +103,23 @@ function extractFromConfig(config) {
   return { selectors, externals, outputDir, inputArray, runner, testRegex, env };
 }
 
-function readSelectorsFile(pathToSelectorsFile) {
+function readYamlFile(pathToYamlFile) {
   try {
-    const resolvedPath = resolve(process.cwd(), pathToSelectorsFile);
+    const resolvedPath = resolve(process.cwd(), pathToYamlFile);
     fs.accessSync(resolvedPath, fs.constants.R_OK);
     return fs.readFileSync(resolvedPath, 'utf8');
   } catch (e) {
-    throw new Error(`Error reading selectors file: ${e.message}`);
+    throw new Error(`Error reading file "${pathToYamlFile}":\n${e.message}`);
   }
 }
 
 function readAndParseYamlFile(pathToYamlFile) {
-  const fileContent = readSelectorsFile(pathToYamlFile);
+  const fileContent = readYamlFile(pathToYamlFile);
 
   try {
     YAML.parse(fileContent);
   } catch (e) {
-    throw new Error(`Error parsing YAML file: ${e.message}`);
+    throw new Error(`Error parsing YAML file "${pathToYamlFile}":\n${e.message}`);
   }
 
   return fileContent;
@@ -173,7 +173,7 @@ export default function run(pathToConfigFile) {
       ? null
       : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
-  const envFile = readAndParseYamlFile(env);
+  const envFile = env ? readAndParseYamlFile(env) : null;
   const files = validateInputFiles(inputArray);
   const specTemplate = fs.readFileSync(
     resolve(__dirname, `../templates/${runner}-spec.mustache`),
