@@ -60,7 +60,7 @@ function importConfigFile(pathToConfigFile) {
 }
 
 function extractFromConfig(config) {
-  let { selectors, externals, input, outputDir, runner, testRegex } = config;
+  let { selectors, externals, input, outputDir, runner, testRegex, env } = config;
 
   let inputArray;
 
@@ -80,6 +80,10 @@ function extractFromConfig(config) {
     throw new Error('externals must be a string path to a Javascript file');
   }
 
+  if (env != null && typeof env !== 'string') {
+    throw new Error('env must be a string path to a YAML file');
+  }
+
   if (!supportedRunners.includes(runner)) {
     throw new Error(`runner must be one of ${supportedRunners.join(', ')}`);
   }
@@ -96,7 +100,7 @@ function extractFromConfig(config) {
     throw new Error('testRegex must be a string');
   }
 
-  return { selectors, externals, outputDir, inputArray, runner, testRegex };
+  return { selectors, externals, outputDir, inputArray, runner, testRegex, env };
 }
 
 function readSelectorsFile(pathToSelectorsFile) {
@@ -109,16 +113,16 @@ function readSelectorsFile(pathToSelectorsFile) {
   }
 }
 
-function readAndParseSelectorsFile(pathToSelectorsFile) {
-  const selectorsFileContent = readSelectorsFile(pathToSelectorsFile);
+function readAndParseYamlFile(pathToYamlFile) {
+  const fileContent = readSelectorsFile(pathToYamlFile);
 
   try {
-    YAML.parse(selectorsFileContent);
+    YAML.parse(fileContent);
   } catch (e) {
-    throw new Error(`Error parsing selectors file: ${e.message}`);
+    throw new Error(`Error parsing YAML file: ${e.message}`);
   }
 
-  return selectorsFileContent;
+  return fileContent;
 }
 
 function getInputFiles(inputGlobArray) {
@@ -154,14 +158,22 @@ export default function run(pathToConfigFile) {
     pathToConfigFile = findConfigFile();
   }
   const config = importConfigFile(pathToConfigFile);
-  const { selectors, externals, outputDir, inputArray, runner, testRegex } =
-    extractFromConfig(config);
+  const {
+    selectors,
+    externals,
+    outputDir,
+    inputArray,
+    runner,
+    testRegex,
+    env
+  } = extractFromConfig(config);
   checkExternals(externals);
   const outputPathToExternals =
     externals == null
       ? null
       : relative(outputDir, externals).replace(/\\/g, '/');
-  const selectorsFile = readAndParseSelectorsFile(selectors);
+  const selectorsFile = readAndParseYamlFile(selectors);
+  const envFile = readAndParseYamlFile(env);
   const files = validateInputFiles(inputArray);
   const specTemplate = fs.readFileSync(
     resolve(__dirname, `../templates/${runner}-spec.mustache`),
@@ -202,6 +214,7 @@ export default function run(pathToConfigFile) {
     const view = {
       pathToExternals: outputPathToExternals,
       selectorTree: selectorsFile,
+      env: envFile,
       sourceFileName: sourceFileName,
       specs,
       blocks,

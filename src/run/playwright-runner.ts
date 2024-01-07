@@ -15,14 +15,19 @@ import { Page } from 'playwright';
 export class PlaywrightRunner {
   selectorTree: SelectorTree;
   externals: Externals;
+  env: Record<string, string>;
   fragments: string[];
 
-  constructor(selectorTree: string | SelectorTree, externals: Externals = {}) {
+  constructor(selectorTree: string | SelectorTree, externals: Externals = {}, env: string | Record<string, string> = {}) {
     this.selectorTree =
       typeof selectorTree === 'string'
         ? YAML.parse(selectorTree)
         : selectorTree;
     this.externals = externals;
+    this.env =
+      typeof env === 'string'
+        ? YAML.parse(env)
+        : env;
     this.fragments = [];
     validateContext(this.selectorTree, this.externals);
   }
@@ -38,6 +43,7 @@ export class PlaywrightRunner {
       str,
       this.selectorTree,
       this.externals,
+      this.env,
     );
 
     for (const instruction of instructions) {
