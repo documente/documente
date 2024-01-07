@@ -7,7 +7,7 @@ const selectorTree = `
 `;
 
 const env = {{#env}}`
-{{{.}}}`;{{/env}}{{^env}}''{{/env}};
+{{{.}}}`{{/env}}{{^env}}''{{/env}};
 
 const testRunner = new PlaywrightRunner(selectorTree, {{#pathToExternals}}externals{{/pathToExternals}}{{^pathToExternals}}{}{{/pathToExternals}}, env);
 
