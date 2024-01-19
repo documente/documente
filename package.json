@@ -1,5 +1,5 @@
 {
-  "name": "@documente/documente",
+  "name": "@documente/source",
   "version": "1.0.0-beta.17",
   "description": "A literate testing framework to generate automated tests from documentation files",
   "repository": {
@@ -14,40 +14,10 @@
     "tdd",
     "e2e"
   ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "author": "pckerneis",
   "license": "GPL-3.0",
-  "publishConfig": {
-    "access": "public"
-  },
-  "type": "module",
-  "bin": {
-    "documente": "bin/index.mjs"
-  },
-  "files": [
-    "src/extract/**/*",
-    "src/templates/**/*",
-    "dist"
-  ],
-  "scripts": {
-    "prettier": "prettier --write .",
-    "build": "tsup src/run/index.ts --format cjs,esm --dts --clean",
-    "prepublishOnly": "npm run build"
-  },
-  "dependencies": {
-    "@documente/phrase": "^1.0.0-beta.15",
-    "chalk": "^5.3.0",
-    "commander": "^11.1.0",
-    "glob": "^10.3.10",
-    "mustache": "^4.2.0",
-    "yaml": "^2.3.4"
-  },
-  "devDependencies": {
-    "playwright": "^1.40.1",
-    "prettier": "^3.1.0",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.3"
-  }
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
 }

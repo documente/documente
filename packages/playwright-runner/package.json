@@ -1,0 +1,40 @@
+{
+  "name": "@documente/playwright-runner",
+  "version": "1.0.0-beta.0",
+  "description": "Phrasé runner for Playwright",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/documente/documente.git"
+  },
+  "keywords": [
+    "documentation",
+    "testing",
+    "literate",
+    "bdd",
+    "tdd",
+    "e2e"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "pckerneis",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prettier": "prettier --write .",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@documente/phrase": "^1.0.0-beta.15",
+    "playwright": "^1.41.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "prettier": "^3.1.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}

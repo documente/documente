@@ -35,16 +35,17 @@ export class CypressRunner {
   fragments: string[];
   env: Record<string, string>;
 
-  constructor(selectorTree: string | SelectorTree, externals: Externals = {}, env: string | Record<string, string> = {}) {
+  constructor(
+    selectorTree: string | SelectorTree,
+    externals: Externals = {},
+    env: string | Record<string, string> = {},
+  ) {
     this.selectorTree =
       typeof selectorTree === 'string'
         ? YAML.parse(selectorTree)
         : selectorTree;
     this.externals = externals;
-    this.env =
-      typeof env === 'string'
-        ? YAML.parse(env)
-        : env;
+    this.env = typeof env === 'string' ? YAML.parse(env) : env;
     this.fragments = [];
     validateContext(this.selectorTree, this.externals);
   }
