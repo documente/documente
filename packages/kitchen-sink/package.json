@@ -11,9 +11,9 @@
     "playwright:open": "npx playwright test --ui",
     "playwright:run": "npx playwright test",
     "prepare-test": "npx playwright install --with-deps",
-    "test:cypress": "npm run documente:cypress && npm run cypress:run",
-    "test:playwright": "wait-on http://localhost:8080 && npm run documente:playwright && npm run playwright:run",
-    "test:all": "wait-on http://127.0.0.1:8080 && npm run test:cypress && npm run test:playwright",
+    "test:cypress": "wait-on http://127.0.0.1:8080 && npm run documente:cypress && npm run cypress:run",
+    "test:playwright": "wait-on http://127.0.0.1:8080 && npm run documente:playwright && npm run playwright:run",
+    "test:all": "npm run test:cypress && npm run test:playwright",
     "test": "concurrently \"npm run start\" \"npm run test:all\" --kill-others --success !command-0"
   },
   "devDependencies": {
