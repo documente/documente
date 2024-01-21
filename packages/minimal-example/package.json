@@ -12,6 +12,7 @@
   },
   "scripts": {
     "generate-tests": "documente",
+    "prepare-test": "npx playwright install",
     "test": "documente && playwright test",
     "test-ui": "playwright test --ui"
   },

@@ -31,7 +31,9 @@ jobs:
       run: npm run prettier:check
     - name: Linter check
       run: npm run lint
-    - name: TSC build
+    - name: Build
       run: npm run build
+    - name: Prepare tests
+      run: npm run prepare-test
     - name: Run tests
       run: npm run test

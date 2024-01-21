@@ -21,6 +21,7 @@
     "prettier:check": "npm run prettier:check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
+    "prepare-test": "npm run prepare-test --workspaces --if-present",
     "test": "npm run test --workspaces --if-present"
   },
   "workspaces": [
