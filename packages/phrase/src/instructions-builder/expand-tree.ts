@@ -1,9 +1,8 @@
-import {Selector, SelectorTree} from '../interfaces/selector-tree.interface';
+import { Selector, SelectorTree } from '../interfaces/selector-tree.interface';
 
 export function expandTree(tree: SelectorTree): SelectorTree {
   const templateNodes = Object.fromEntries(
-      Object.entries(tree)
-          .filter(([key]) => isTemplateNodeKey(key))
+    Object.entries(tree).filter(([key]) => isTemplateNodeKey(key)),
   );
 
   Object.keys(templateNodes).forEach((key) => {
@@ -17,7 +16,10 @@ export function expandTree(tree: SelectorTree): SelectorTree {
   return expandTreeWithTemplates(tree, templateNodes);
 }
 
-function expandTreeWithTemplates(tree: SelectorTree, templateNodes: SelectorTree): SelectorTree {
+function expandTreeWithTemplates(
+  tree: SelectorTree,
+  templateNodes: SelectorTree,
+): SelectorTree {
   const expandedTree: SelectorTree = {};
 
   Object.keys(tree).forEach((key) => {
@@ -29,20 +31,24 @@ function expandTreeWithTemplates(tree: SelectorTree, templateNodes: SelectorTree
   return expandedTree;
 }
 
-function expandNode(nodeKey: string,
-                    node: Selector | SelectorTree,
-                    templateNodes: SelectorTree,
-                    expandedKeys: string[] = []): SelectorTree | Selector {
+function expandNode(
+  nodeKey: string,
+  node: Selector | SelectorTree,
+  templateNodes: SelectorTree,
+  expandedKeys: string[] = [],
+): SelectorTree | Selector {
   if (typeof node === 'string' || typeof node === 'function') {
     return node;
   }
 
-  let expandedNode: SelectorTree | Selector = {...node};
+  let expandedNode: SelectorTree | Selector = { ...node };
 
   if (node._extends) {
     if (expandedKeys.includes(node._extends)) {
       const path = [...expandedKeys, node._extends];
-      throw new Error(`Circular reference in template node "${nodeKey}": ${path.join(' -> ')}`);
+      throw new Error(
+        `Circular reference in template node "${nodeKey}": ${path.join(' -> ')}`,
+      );
     }
 
     expandedKeys.push(node._extends);
@@ -54,13 +60,18 @@ function expandNode(nodeKey: string,
     }
 
     if (typeof template === 'object') {
-      expandedNode = {...template, ...node};
+      expandedNode = { ...template, ...node };
       if (template._extends) {
         expandedNode._extends = template._extends;
-        expandedNode = expandNode(nodeKey, expandedNode, templateNodes, expandedKeys);
+        expandedNode = expandNode(
+          nodeKey,
+          expandedNode,
+          templateNodes,
+          expandedKeys,
+        );
       }
     } else {
-      expandedNode = {_selector: template, ...node};
+      expandedNode = { _selector: template, ...node };
     }
   }
 
@@ -70,7 +81,12 @@ function expandNode(nodeKey: string,
     }
 
     const expandedTree = expandedNode as SelectorTree;
-    expandedTree[key] = expandNode(key, expandedTree[key]!, templateNodes, expandedKeys);
+    expandedTree[key] = expandNode(
+      key,
+      expandedTree[key]!,
+      templateNodes,
+      expandedKeys,
+    );
   });
 
   return expandedNode;

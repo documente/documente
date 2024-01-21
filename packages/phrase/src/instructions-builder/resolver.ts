@@ -1,9 +1,9 @@
-import {getNode} from '../get-node';
-import {isQuoted} from '../quoted-text';
-import {SelectorTree} from '../interfaces/selector-tree.interface';
-import {ResolvedTarget} from '../interfaces/instructions.interface';
-import {withNamedArgumentsRemoved} from './named-arguments';
-import {equalsCaseInsensitive} from '../equalsCaseInsensitive';
+import { getNode } from '../get-node';
+import { isQuoted } from '../quoted-text';
+import { SelectorTree } from '../interfaces/selector-tree.interface';
+import { ResolvedTarget } from '../interfaces/instructions.interface';
+import { withNamedArgumentsRemoved } from './named-arguments';
+import { equalsCaseInsensitive } from '../equalsCaseInsensitive';
 
 export function resolve(
   tree: SelectorTree,
@@ -57,27 +57,30 @@ export function resolve(
   return resolvePathRecursively(tree, pathSegments);
 }
 
-function resolveRelativeToPrevious(tree: SelectorTree, previous: ResolvedTarget[], pathSegments: string[]): ResolvedTarget[] | undefined {
+function resolveRelativeToPrevious(
+  tree: SelectorTree,
+  previous: ResolvedTarget[],
+  pathSegments: string[],
+): ResolvedTarget[] | undefined {
   const previousNode = getNode(
-      tree,
-      previous.map((p) => p.key),
+    tree,
+    previous.map((p) => p.key),
   );
 
   if (!previousNode) {
     throw new Error(
-        `Could not find node at path ${previous
-            .map((p) => p.fragments)
-            .flat()
-            .join(' ')}`,
+      `Could not find node at path ${previous
+        .map((p) => p.fragments)
+        .flat()
+        .join(' ')}`,
     );
   }
 
   const pathSegmentsWithoutIts =
-      pathSegments[0] === 'its' ? pathSegments.slice(1) : pathSegments;
+    pathSegments[0] === 'its' ? pathSegments.slice(1) : pathSegments;
 
   return resolvePathRecursively(previousNode, pathSegmentsWithoutIts);
 }
-
 
 export function resolvePathRecursively(
   node: SelectorTree,
@@ -112,8 +115,8 @@ export function resolvePathRecursively(
 }
 
 export function resolvePath(
-    tree: SelectorTree,
-    pathSegments: string[],
+  tree: SelectorTree,
+  pathSegments: string[],
 ): ResolvedTarget | undefined {
   const keys = Object.keys(tree);
 

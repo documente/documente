@@ -1,37 +1,37 @@
 import { expect, test } from '@jest/globals';
-import {expandTree} from './expand-tree';
+import { expandTree } from './expand-tree';
 
 test('should expand a root node with a template node', () => {
   const expandedTree = expandTree({
     foo: {
-        _extends: 'baz*',
+      _extends: 'baz*',
     },
-    "baz*": {
+    'baz*': {
       qux: 'qux',
     },
   });
 
   expect(expandedTree).toEqual({
     foo: {
-        _extends: 'baz*',
-        qux: 'qux',
-    }
+      _extends: 'baz*',
+      qux: 'qux',
+    },
   });
 });
 
 test('should expand a root node with a template selector', () => {
   const expandedTree = expandTree({
     foo: {
-        _extends: 'baz*',
+      _extends: 'baz*',
     },
-    "baz*": 'baz'
+    'baz*': 'baz',
   });
 
   expect(expandedTree).toEqual({
     foo: {
-        _extends: 'baz*',
-        _selector: 'baz',
-    }
+      _extends: 'baz*',
+      _selector: 'baz',
+    },
   });
 });
 
@@ -42,7 +42,7 @@ test('should expand a nested node', () => {
         _extends: 'baz*',
       },
     },
-    "baz*": {
+    'baz*': {
       qux: 'qux',
     },
   });
@@ -53,7 +53,7 @@ test('should expand a nested node', () => {
         _extends: 'baz*',
         qux: 'qux',
       },
-    }
+    },
   });
 });
 
@@ -61,20 +61,20 @@ test('should reject nested template nodes', () => {
   expect(() => {
     expandTree({
       foo: {
-        'bar*': 'bar'
+        'bar*': 'bar',
       },
     });
-  }).toThrowError(`Template node "bar*" cannot be nested`);
+  }).toThrow(`Template node "bar*" cannot be nested`);
 });
 
 test('should reject nested template nodes in templates', () => {
   expect(() => {
     expandTree({
-      "*foo": {
-        'bar*': 'bar'
+      '*foo': {
+        'bar*': 'bar',
       },
     });
-  }).toThrowError(`Template node "bar*" cannot be nested`);
+  }).toThrow(`Template node "bar*" cannot be nested`);
 });
 
 test('should expand template nodes', () => {
@@ -82,12 +82,12 @@ test('should expand template nodes', () => {
     foo: {
       _extends: 'bar*',
     },
-    "bar*": {
+    'bar*': {
       baz: {
         _extends: 'qux*',
       },
     },
-    "qux*": 'qux',
+    'qux*': 'qux',
   });
 
   expect(expandedTree).toEqual({
@@ -95,8 +95,8 @@ test('should expand template nodes', () => {
       _extends: 'bar*',
       baz: {
         _extends: 'qux*',
-        _selector: 'qux'
-      }
+        _selector: 'qux',
+      },
     },
   });
 });
@@ -108,7 +108,7 @@ test('should reject missing template nodes', () => {
         _extends: 'bar*',
       },
     });
-  }).toThrowError(`Could not find template node "bar*"`);
+  }).toThrow(`Could not find template node "bar*"`);
 });
 
 test('should reject recursive template nodes', () => {
@@ -117,11 +117,11 @@ test('should reject recursive template nodes', () => {
       foo: {
         _extends: 'bar*',
       },
-      "bar*": {
+      'bar*': {
         _extends: 'bar*',
       },
     });
-  }).toThrowError(`Circular reference in template node "bar*": bar* -> bar*`);
+  }).toThrow(`Circular reference in template node "bar*": bar* -> bar*`);
 });
 
 test('should reject nested template recursion', () => {
@@ -130,13 +130,13 @@ test('should reject nested template recursion', () => {
       foo: {
         bar: {
           _extends: 'baz*',
-        }
+        },
       },
-      "baz*": {
+      'baz*': {
         _extends: 'baz*',
       },
     });
-  }).toThrowError(`Circular reference in template node "baz*": baz* -> baz*`);
+  }).toThrow(`Circular reference in template node "baz*": baz* -> baz*`);
 });
 
 test('should reject cross-recursion in templates', () => {
@@ -145,14 +145,16 @@ test('should reject cross-recursion in templates', () => {
       foo: {
         _extends: 'bar*',
       },
-      "bar*": {
+      'bar*': {
         _extends: 'baz*',
       },
-      "baz*": {
+      'baz*': {
         _extends: 'bar*',
       },
     });
-  }).toThrowError(`Circular reference in template node "bar*": bar* -> baz* -> bar*`);
+  }).toThrow(
+    `Circular reference in template node "bar*": bar* -> baz* -> bar*`,
+  );
 });
 
 test('should reject deep cross-recursion in templates', () => {
@@ -161,17 +163,19 @@ test('should reject deep cross-recursion in templates', () => {
       foo: {
         _extends: 'bar*',
       },
-      "bar*": {
+      'bar*': {
         _extends: 'baz*',
       },
-      "baz*": {
+      'baz*': {
         _extends: 'qux*',
       },
-      "qux*": {
+      'qux*': {
         _extends: 'bar*',
       },
     });
-  }).toThrowError(`Circular reference in template node "bar*": bar* -> baz* -> qux* -> bar*`);
+  }).toThrow(
+    `Circular reference in template node "bar*": bar* -> baz* -> qux* -> bar*`,
+  );
 });
 
 test('should reject nested cross-recursion in templates', () => {
@@ -180,18 +184,17 @@ test('should reject nested cross-recursion in templates', () => {
       foo: {
         _extends: 'bar*',
       },
-      "bar*": {
+      'bar*': {
         baz: {
           _extends: 'qux*',
-        }
+        },
       },
-      "qux*": {
+      'qux*': {
         _extends: 'bar*',
       },
     });
-  }).toThrowError(`Circular reference in template node "baz": bar* -> qux* -> bar*`);
+  }).toThrow(`Circular reference in template node "baz": bar* -> qux* -> bar*`);
 });
-
 
 test('should reject nested deep cross-recursion in templates', () => {
   expect(() => {
@@ -199,16 +202,18 @@ test('should reject nested deep cross-recursion in templates', () => {
       foo: {
         _extends: 'bar*',
       },
-      "bar*": {
+      'bar*': {
         baz: {
           _extends: 'qux*',
-        }
+        },
       },
-      "qux*": {
+      'qux*': {
         quux: {
           _extends: 'bar*',
-        }
+        },
       },
     });
-  }).toThrowError(`Circular reference in template node "quux": bar* -> qux* -> bar*`);
+  }).toThrow(
+    `Circular reference in template node "quux": bar* -> qux* -> bar*`,
+  );
 });

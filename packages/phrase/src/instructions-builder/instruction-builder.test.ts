@@ -85,7 +85,7 @@ test('should build an action with arguments', () => {
 test('should build an assertion', () => {
   const tree: SelectorTree = {
     button: 'button',
-    "welcome message": 'h1',
+    'welcome message': 'h1',
   };
 
   const instructions = buildInstructions(
@@ -112,7 +112,7 @@ test('should build an assertion', () => {
 test('should build an assertion with quoted text argument', () => {
   const tree: SelectorTree = {
     button: 'button',
-    "welcome message": 'h1',
+    'welcome message': 'h1',
   };
 
   const instructions = buildInstructions(
