@@ -3,7 +3,7 @@
   "version": "1.0.0-beta.1",
   "license": "GPL-3.0",
   "scripts": {
-    "start": "npx http-server docs -p 8080",
+    "start": "npx http-server static -p 8080",
     "documente:cypress": "documente -c documente-cypress.config.yaml",
     "documente:playwright": "documente -c documente-playwright.config.yaml",
     "cypress:open": "cypress open",
