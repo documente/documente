@@ -26,10 +26,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
-      run: yarn --frozen-lockfile
+      run: npm ci
+    - name: Prettier check
+      run: npm run prettier:check
     - name: Linter check
       run: npm run lint
     - name: TSC build
       run: npm run build
-    - name: Run Jest tests
-      run: npm test
+    - name: Run tests
+      run: npm run test

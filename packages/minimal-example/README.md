@@ -105,7 +105,7 @@ npm run test-ui
 
 This command will open the Playwright test runner from which you can run the generated tests.
 
-Alternatively, you can run the tests in headless mode:
+Alternatively, you can generate and run the tests in headless mode in a single command with:
 
 ```bash
 npm run test

@@ -23,7 +23,8 @@
     "access": "public"
   },
   "scripts": {
-    "prettier": "prettier --write .",
+    "prettier:check": "prettier .",
+    "prettier:fix": "prettier --write .",
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "prepublishOnly": "npm run build"
   },

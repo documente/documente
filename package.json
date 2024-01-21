@@ -17,6 +17,12 @@
   "author": "pckerneis",
   "license": "GPL-3.0",
   "private": true,
+  "scripts": {
+    "prettier:check": "npm run prettier:check --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
   "workspaces": [
     "packages/*"
   ]

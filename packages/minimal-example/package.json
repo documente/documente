@@ -12,7 +12,7 @@
   },
   "scripts": {
     "generate-tests": "documente",
-    "test": "playwright test",
+    "test": "documente && playwright test",
     "test-ui": "playwright test --ui"
   },
   "devDependencies": {
