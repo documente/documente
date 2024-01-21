@@ -43,7 +43,7 @@ when I click on welcome page greet button
 then welcome message should be visible
 ```
 
-Learn more about the language structure in the [Language Overview](docs/language-overview.md).
+Learn more about the language structure in the [Language Overview](https://documente.github.io/language-overview.html).
 
 ### System Under Test (SUT) Representation
 
@@ -170,4 +170,4 @@ See `LICENSE` for more information.
 
 Pierre-Clément KERNEIS - pc.kerneis@gmail.com
 
-Project Link: https://github.com/documente/phrase
+Project Link: https://github.com/documente/documente
