@@ -1,0 +1,49 @@
+{
+  "name": "@documente/generator",
+  "version": "1.0.0-beta.0",
+  "description": "A literate testing framework to generate automated tests from documentation files",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/documente/documente.git"
+  },
+  "keywords": [
+    "documentation",
+    "testing",
+    "literate",
+    "bdd",
+    "tdd",
+    "e2e"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "pckerneis",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "bin": {
+    "documente": "bin/index.mjs"
+  },
+  "files": [
+    "src/extract/**/*",
+    "src/templates/**/*",
+    "dist"
+  ],
+  "scripts": {
+    "start": "node bin/index.mjs",
+    "prettier": "prettier --write ."
+  },
+  "dependencies": {
+    "@documente/phrase": "^1.0.0-beta.15",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "glob": "^10.3.10",
+    "mustache": "^4.2.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "prettier": "^3.1.0"
+  }
+}

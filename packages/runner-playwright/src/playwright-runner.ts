@@ -18,16 +18,17 @@ export class PlaywrightRunner {
   env: Record<string, string>;
   fragments: string[];
 
-  constructor(selectorTree: string | SelectorTree, externals: Externals = {}, env: string | Record<string, string> = {}) {
+  constructor(
+    selectorTree: string | SelectorTree,
+    externals: Externals = {},
+    env: string | Record<string, string> = {},
+  ) {
     this.selectorTree =
       typeof selectorTree === 'string'
         ? YAML.parse(selectorTree)
         : selectorTree;
     this.externals = externals;
-    this.env =
-      typeof env === 'string'
-        ? YAML.parse(env)
-        : env;
+    this.env = typeof env === 'string' ? YAML.parse(env) : env;
     this.fragments = [];
     validateContext(this.selectorTree, this.externals);
   }
@@ -89,7 +90,7 @@ export class PlaywrightRunner {
         break;
       case 'clear':
         if (this.targetIsDefined(selectors, action)) {
-          await page.locator(selectors.join(' ')).clear()
+          await page.locator(selectors.join(' ')).clear();
         }
         break;
       case 'double_click':

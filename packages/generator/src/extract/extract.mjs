@@ -27,9 +27,16 @@ const defaultExtensions = {
 // Starting from the current working directory, look for a config file named "documente.config.yml"
 // or "documente.config.yaml". While config file is not found, go up one directory and repeat.
 function findConfigFile() {
+  console.log('Looking for config file...');
   let currentDirectory = process.cwd();
 
+  let depth = 0;
+
   while (currentDirectory !== '/') {
+    if (depth > 10) {
+      throw new Error('Too many directories traversed. Make sure you have a config file in your project.');
+    }
+
     const configFiles = glob(
       ['documente.config.yml', 'documente.config.yaml'],
       {
@@ -44,6 +51,7 @@ function findConfigFile() {
     }
 
     currentDirectory = dirname(currentDirectory);
+    depth++;
   }
 
   throw new Error('No config file found');
@@ -60,7 +68,8 @@ function importConfigFile(pathToConfigFile) {
 }
 
 function extractFromConfig(config) {
-  let { selectors, externals, input, outputDir, runner, testRegex, env } = config;
+  let { selectors, externals, input, outputDir, runner, testRegex, env } =
+    config;
 
   let inputArray;
 
@@ -100,7 +109,15 @@ function extractFromConfig(config) {
     throw new Error('testRegex must be a string');
   }
 
-  return { selectors, externals, outputDir, inputArray, runner, testRegex, env };
+  return {
+    selectors,
+    externals,
+    outputDir,
+    inputArray,
+    runner,
+    testRegex,
+    env,
+  };
 }
 
 function readYamlFile(pathToYamlFile) {
@@ -119,7 +136,9 @@ function readAndParseYamlFile(pathToYamlFile) {
   try {
     YAML.parse(fileContent);
   } catch (e) {
-    throw new Error(`Error parsing YAML file "${pathToYamlFile}":\n${e.message}`);
+    throw new Error(
+      `Error parsing YAML file "${pathToYamlFile}":\n${e.message}`,
+    );
   }
 
   return fileContent;
@@ -165,7 +184,7 @@ export default function run(pathToConfigFile) {
     inputArray,
     runner,
     testRegex,
-    env
+    env,
   } = extractFromConfig(config);
   checkExternals(externals);
   const outputPathToExternals =
@@ -197,8 +216,8 @@ export default function run(pathToConfigFile) {
     }
 
     matches
-        .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
-        .forEach((block) => splitter.add(block));
+      .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
+      .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
     const blocks = splitResult.blocks.map((block) => ({ block }));
@@ -226,7 +245,7 @@ export default function run(pathToConfigFile) {
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
-        chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
+      chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
     );
     generatedFileCount++;
   });
