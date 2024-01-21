@@ -1,7 +1,7 @@
 {
-  "name": "@documente/playwright-runner",
+  "name": "@documente/runner-cypress",
   "version": "1.0.0-beta.0",
-  "description": "Phrasé runner for Playwright",
+  "description": "Phrasé runner for Cypress",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/documente/documente.git"
@@ -14,8 +14,8 @@
     "tdd",
     "e2e"
   ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "author": "pckerneis",
   "license": "GPL-3.0",
@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@documente/phrase": "^1.0.0-beta.15",
-    "playwright": "^1.41.0",
     "yaml": "^2.3.4"
   },
   "devDependencies": {
