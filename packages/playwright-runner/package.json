@@ -14,8 +14,8 @@
     "tdd",
     "e2e"
   ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "author": "pckerneis",
   "license": "GPL-3.0",

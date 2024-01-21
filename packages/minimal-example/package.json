@@ -1,0 +1,23 @@
+{
+  "name": "@documente/minimal-example",
+  "version": "1.0.0-beta.0",
+  "description": "A minimal example of the Documenté framework",
+  "main": "index.js",
+  "author": "pckerneis",
+  "license": "GPL3",
+  "homepage": "https://documente.github.io/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/documente/minimal-example"
+  },
+  "scripts": {
+    "generate-tests": "documente",
+    "test": "playwright test",
+    "test-ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@documente/playwright-runner": "^1.0.0-beta.0",
+    "@playwright/test": "^1.41.1",
+    "@types/node": "^20.11.5"
+  }
+}

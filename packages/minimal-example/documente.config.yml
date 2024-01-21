@@ -1,0 +1,3 @@
+runner: playwright
+input: README.md
+selectors: documente.selectors.yml
