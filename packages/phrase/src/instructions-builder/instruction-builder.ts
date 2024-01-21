@@ -9,7 +9,7 @@ import { BuildContext } from '../interfaces/build-context.interface';
 import { extractInstructionsFromStatement } from './generic-instruction-extractor';
 import { SelectorTree } from '../interfaces/selector-tree.interface';
 import { Externals } from '../interfaces/externals.interface';
-import {expandTree} from './expand-tree';
+import { expandTree } from './expand-tree';
 
 export function buildInstructions(
   input: string,
