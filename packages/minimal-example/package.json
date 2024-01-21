@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@documente/generator": "^1.0.0-beta.0",
-    "@documente/playwright-runner": "^1.0.0-beta.0",
+    "@documente/runner-playwright": "^1.0.0-beta.0",
     "@playwright/test": "^1.41.1",
     "@types/node": "^20.11.5"
   }
