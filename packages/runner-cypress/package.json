@@ -29,7 +29,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@documente/phrase": "^1.0.0-beta.15",
+    "@documente/phrase": "../phrase",
     "yaml": "^2.3.4"
   },
   "devDependencies": {

@@ -36,7 +36,7 @@
     "prettier:fix": "prettier --write ."
   },
   "dependencies": {
-    "@documente/phrase": "^1.0.0-beta.15",
+    "@documente/phrase": "../phrase",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
     "glob": "^10.3.10",
