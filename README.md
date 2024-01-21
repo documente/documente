@@ -26,7 +26,7 @@ This monorepository contains the core components of the Documenté framework.
 
 ## Getting started
 
-See the [Get Started guide](https://documente.github.io/get-started.html).
+See the [Getting Started guide](https://documente.github.io/getting-started.html).
 
 ## Contributing
 
