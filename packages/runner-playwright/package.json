@@ -1,6 +1,6 @@
 {
   "name": "@documente/runner-playwright",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "Phrasé runner for Playwright",
   "repository": {
     "type": "git",
@@ -17,6 +17,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "author": "pckerneis",
   "license": "GPL-3.0",
   "publishConfig": {
