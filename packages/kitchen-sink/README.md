@@ -1,6 +1,6 @@
 # Documenté Kitchen Sink
 
-> See it live at [https://documente.github.io/kitchen-sink/](https://documente.github.io/kitchen-sink/)
+> See it live at [https://documente.github.io/documente/](https://documente.github.io/documente/)
 
 The Kitchen Sink is a small web application that showcases Documenté features with small example tests.
 
