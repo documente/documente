@@ -9,6 +9,7 @@ import { BuildContext } from '../interfaces/build-context.interface';
 import { extractInstructionsFromStatement } from './generic-instruction-extractor';
 import { SelectorTree } from '../interfaces/selector-tree.interface';
 import { Externals } from '../interfaces/externals.interface';
+import { expandTree } from './expand-tree';
 
 export function buildInstructions(
   input: string,
@@ -16,6 +17,7 @@ export function buildInstructions(
   externals: Externals,
   envVars: Record<string, string>,
 ): Instruction[] {
+  const expandedTree = expandTree(selectorTree);
   const parser = new Parser();
   const sections = parser.parse(input);
   const blocks = sections.filter(
@@ -24,7 +26,7 @@ export function buildInstructions(
 
   const buildContext: BuildContext = {
     previousPath: [],
-    selectorTree,
+    selectorTree: expandedTree,
     externals,
     blocks,
     input,

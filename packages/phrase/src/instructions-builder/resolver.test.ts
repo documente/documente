@@ -25,7 +25,7 @@ test('resolvePath should resolve a root node with composed tokens', () => {
     welcome: {
       message: {},
     },
-    "welcome message": {},
+    'welcome message': {},
   };
   const result = resolvePath(tree, ['welcome', 'message']);
   expect(result).toEqual({
@@ -60,7 +60,7 @@ test('resolvePathRecursively should resolve a nested node with composed tokens',
     welcome: {
       message: { foo: {} },
     },
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
   const result = resolvePathRecursively(tree, ['welcome', 'message', 'foo']);
   expect(result?.map((r) => r.key)).toEqual(['welcome message', 'foo']);
@@ -71,7 +71,7 @@ test('resolvePathRecursively should throw error if no match is found', () => {
     welcome: {
       message: { foo: {} },
     },
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
 
   const result = resolvePathRecursively(tree, ['foo']);
@@ -179,7 +179,7 @@ test('resolve should ignore previous and previous parent and find from root', ()
 
 test('resolve should throw if previous node is not found', () => {
   const tree = {
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
 
   expect(() =>
@@ -220,7 +220,7 @@ test('splitOnQuotedText should group segments with quoted text at the end', () =
 
 test('resolveRecursively should resolve a nested node with quoted text', () => {
   const tree = {
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
   const result = resolvePathRecursively(tree, [
     'welcome',
@@ -233,7 +233,7 @@ test('resolveRecursively should resolve a nested node with quoted text', () => {
 
 test('resolve should resolve in child of previous node when path starts with its', () => {
   const tree = {
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
   const result = resolve(
     tree,
@@ -250,7 +250,7 @@ test('resolve should resolve in child of previous node when path starts with its
 
 test('resolve should throw if using its without child path', () => {
   const tree = {
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
   expect(() =>
     resolve(
@@ -268,7 +268,7 @@ test('resolve should throw if using its without child path', () => {
 
 test('resolve should throw if cannot find child node using its', () => {
   const tree = {
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
   expect(() =>
     resolve(
@@ -286,7 +286,7 @@ test('resolve should throw if cannot find child node using its', () => {
 
 test('resolve should throw if using its without previous path', () => {
   const tree = {
-    "welcome message": { foo: {} },
+    'welcome message': { foo: {} },
   };
   expect(() => resolve(tree, ['its', 'foo'], [])).toThrow(
     'Cannot use "its" without a previous path',
