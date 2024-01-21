@@ -1,0 +1,79 @@
+# Click
+button1: '#button1'
+message1: '#message1'
+
+# Double-click
+button2: '#button2'
+message2: '#message2'
+
+# Right-click
+button3: '#button3'
+message3: '#message3'
+
+# Type
+input1: '#input1'
+
+# Clear
+input2: '#input2'
+
+# Check
+checkbox1: '#checkbox1'
+message4: '#message4'
+
+# Uncheck
+checkbox2: '#checkbox2'
+message5: '#message5'
+
+# Scroll
+scroll-element: '#scroll-element'
+
+# Select
+select1: '#select1'
+message6: '#message6'
+
+# Go back
+forward-link1: '#forward-link1'
+home-header: '#home-header'
+
+# Go forward
+forward-link2: '#forward-link2'
+forward-header: '#forward-header'
+
+# Have text
+span1: '#span1'
+
+# Be visible
+div1: '#div1'
+
+# Be hidden
+hidden-div: '#hidden-div'
+
+# Contain text
+div2: '#div2'
+
+# Have value
+input3: '#input3'
+
+# Have class
+div3: '#div3'
+
+# Exist
+div4: '#div4'
+
+# Not exist
+non-existent element: '#nonExistentElement'
+
+# Be checked
+checkbox3: '#checkbox3'
+
+# Be unchecked
+checkbox4: '#checkbox4'
+
+# Be disabled
+input4: '#input4'
+
+# Be enabled
+input5: '#input5'
+
+# Have occurrences
+multi-element: '.multi-element'

@@ -1,0 +1,5 @@
+runner: playwright
+input: docs/index.js
+selectors: documente.selectors.yaml
+env: documente.env.yaml
+testRegex: \`([^`]*)\`\);

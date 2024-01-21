@@ -1,0 +1,29 @@
+{
+  "name": "@documente/kitchen-sink",
+  "version": "1.0.0-beta.1",
+  "license": "GPL-3.0",
+  "scripts": {
+    "start": "npx http-server docs -p 8080",
+    "documente:cypress": "documente -c documente-cypress.config.yaml",
+    "documente:playwright": "documente -c documente-playwright.config.yaml",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "playwright:open": "npx playwright test --ui",
+    "playwright:run": "npx playwright test",
+    "prepare-test": "npx playwright install --with-deps",
+    "test:cypress": "npm run documente:cypress && npm run cypress:run",
+    "test:playwright": "wait-on http://localhost:8080 && npm run documente:playwright && npm run playwright:run",
+    "test:all": "wait-on http://localhost:8080 && npm run test:cypress && npm run test:playwright",
+    "test": "concurrently \"npm run start\" \"npm run test:all\" --kill-others --success !command-0"
+  },
+  "devDependencies": {
+    "@documente/generator": "../generator",
+    "@documente/runner-cypress": "../runner-cypress",
+    "@documente/runner-playwright": "../runner-playwright",
+    "@playwright/test": "^1.40.1",
+    "@types/node": "^20.10.5",
+    "concurrently": "^8.2.2",
+    "cypress": "^13.6.1",
+    "wait-on": "^7.2.0"
+  }
+}

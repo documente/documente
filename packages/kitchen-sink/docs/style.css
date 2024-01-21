@@ -1,0 +1,172 @@
+:root {
+    font-family: Inter, sans-serif;
+    font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+}
+
+@supports (font-variation-settings: normal) {
+    :root { font-family: InterVariable, sans-serif; }
+}
+
+body {
+    color: #333;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+header .title {
+    display: flex;
+    color: #5cd790;
+    margin-bottom: 1rem;
+}
+
+header img {
+    width: 100%;
+    max-width: 30px;
+    margin: 0 1rem 0 0;
+}
+
+.header-banner {
+    padding: 1rem;
+    background-color: #eeeeee;
+    border-bottom: 1px solid #bbbbbb;
+    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+}
+
+.header-text {
+    margin: 0.2rem 0;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+nav a {
+    display: block;
+    margin-bottom: 3px;
+}
+
+a {
+    color: #414141;
+}
+
+nav a:hover {
+    background-color: #69e59d50;
+}
+
+.container {
+    width: 1000px;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+@media (min-width: 1000px) {
+    .container {
+        width: 800px;
+    }
+}
+
+.category-navigation {
+    margin-right: 3rem;
+    margin-top: 1rem;
+    min-width: 180px;
+}
+
+h1 {
+    margin: 0;
+}
+
+.category-banner {
+    margin: 0;
+    padding: 1rem;
+    background-color: #69e59d;
+}
+
+h3 {
+    margin: 0;
+    color: #0a9b4d;
+}
+
+.category {
+    font-weight: bold;
+    font-size: large;
+    margin: 0.5rem 0;
+}
+
+section.container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.snippet {
+    font-family: monospace;
+    background-color: #eee;
+    padding: 0.5rem;
+    margin: 1rem 0;
+    border: 1px dashed #ccc;
+}
+
+.keyword {
+    color: #d73a49;
+    font-weight: bold;
+}
+
+.quoted-text,
+.number {
+    color: #2391ed;
+}
+
+button {
+    background-color: #459f77;
+    color: white;
+    border: none;
+    padding: 0.3rem;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 0 0.5rem;
+}
+
+button:hover {
+    background-color: #20b78a;
+}
+
+input {
+    padding: 0.3rem;
+    border-radius: 0.3rem;
+    border: 2px solid;
+    margin: 0 0.5rem;
+}
+
+select {
+    padding: 0.3rem;
+    border-radius: 0.3rem;
+    border: 2px solid;
+    margin: 0 0.5rem;
+}
+
+.foo {
+    background-color: #e58e69;
+    color: white;
+    padding: 0.5rem;
+    margin: 1rem 0;
+    font-family: 'Playpen Sans', cursive;
+}
+
+.multi-element {
+    margin: 1rem 0;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    box-shadow: 2px 2px 0.5rem #ccc;
+}
