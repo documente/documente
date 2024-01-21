@@ -19,6 +19,7 @@ This monorepository contains the core components of the Documenté framework.
 | Package name | Description |
 | ------------ | ----------- |
 | [generator](./packages/generator) | Extracts Phrasé tests from documentation files and generate test cases |
+| [kitchen-sink](./packages/kitchen-sink) | A static website with Documenté configuration showcasing the API |
 | [minimal-example](./packages/minimal-example) | An example of a Documenté configuration to run tests against example.com |
 | [phrase](./packages/phrase) | The Phrasé language parser |
 | [runner-cypress](./packages/runner-cypress) | Test runner for Cypress |
