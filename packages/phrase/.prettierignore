@@ -1,0 +1,9 @@
+build
+coverage
+package.json
+package-lock.json
+.github
+docs
+**/*.hbs
+**/README.md
+dist
