@@ -1,6 +1,6 @@
 {
   "name": "@documente/runner-cypress",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "Phrasé runner for Cypress",
   "repository": {
     "type": "git",
@@ -14,9 +14,12 @@
     "tdd",
     "e2e"
   ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "author": "pckerneis",
   "license": "GPL-3.0",
   "publishConfig": {
