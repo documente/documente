@@ -4,7 +4,7 @@
   "description": "A fluent automated testing library for web applications",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/documente/phrase.git"
+    "url": "git+https://github.com/documente/documente.git"
   },
   "author": "pckerneis <pc.kerneis@gmail.com>",
   "license": "GPL-3.0",
