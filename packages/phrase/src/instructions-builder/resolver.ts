@@ -1,48 +1,35 @@
-import { getNode } from '../get-node';
-import { isQuoted } from '../quoted-text';
-import { SelectorTree } from '../interfaces/selector-tree.interface';
-import { ResolvedTarget } from '../interfaces/instructions.interface';
-import { withNamedArgumentsRemoved } from './named-arguments';
-import { decamelize } from '../decamelize';
+import {getNode} from '../get-node';
+import {isQuoted} from '../quoted-text';
+import {SelectorTree} from '../interfaces/selector-tree.interface';
+import {ResolvedTarget} from '../interfaces/instructions.interface';
+import {withNamedArgumentsRemoved} from './named-arguments';
+import {equalsCaseInsensitive} from '../equalsCaseInsensitive';
 
 export function resolve(
   tree: SelectorTree,
   pathSegments: string[],
   previous: ResolvedTarget[],
 ): ResolvedTarget[] | undefined {
-  if (pathSegments[0] === 'its' && pathSegments.length === 1) {
-    throw new Error(`Expected child path after "its" but got nothing.`);
-  }
-
-  if (pathSegments[0] === 'its' && previous.length === 0) {
-    throw new Error('Cannot use "its" without a previous path.');
-  }
-
-  if (previous?.length > 0) {
-    const previousNode = getNode(
-      tree,
-      previous.map((p) => p.key),
-    );
-
-    if (!previousNode) {
-      throw new Error(
-        `Could not find node at path ${previous
-          .map((p) => p.fragments)
-          .flat()
-          .join(' ')}`,
-      );
+  if (pathSegments[0] === 'its') {
+    if (pathSegments.length === 1) {
+      throw new Error(`Expected child path after "its" but got nothing.`);
     }
 
-    const pathSegmentsWithoutIts =
-      pathSegments[0] === 'its' ? pathSegments.slice(1) : pathSegments;
+    if (previous.length === 0) {
+      throw new Error('Cannot use "its" without a previous path.');
+    }
+  }
 
-    const match = resolvePathRecursively(previousNode, pathSegmentsWithoutIts);
+  // Search relative to previous path
+  if (previous?.length > 0) {
+    const match = resolveRelativeToPrevious(tree, previous, pathSegments);
 
     if (match) {
       return [...previous, ...match];
     }
   }
 
+  // If first segment is "its" we can stop here
   if (pathSegments[0] === 'its') {
     const fullPath = [
       ...previous.map((p) => p.fragments).flat(),
@@ -51,7 +38,8 @@ export function resolve(
     throw new Error(`Cannot find child node at path ${fullPath.join(' ')}`);
   }
 
-  if (previous?.length > 1 && pathSegments[0] !== 'its') {
+  // Search relative to previous parent
+  if (previous?.length > 1) {
     const pathToParent = previous.slice(0, -1);
     const parentNode = getNode(
       tree,
@@ -65,32 +53,31 @@ export function resolve(
     }
   }
 
+  // Search from root
   return resolvePathRecursively(tree, pathSegments);
 }
 
-export function resolvePath(
-  tree: SelectorTree,
-  pathSegments: string[],
-): ResolvedTarget | undefined {
-  const keys = Object.keys(tree);
+function resolveRelativeToPrevious(tree: SelectorTree, previous: ResolvedTarget[], pathSegments: string[]): ResolvedTarget[] | undefined {
+  const previousNode = getNode(
+      tree,
+      previous.map((p) => p.key),
+  );
 
-  for (let j = pathSegments.length; j > 0; j--) {
-    const assembledToken = pathSegments.slice(0, j).join(' ');
-    const matchingKey = keys.find((key) => {
-      const keyWithoutNamedArguments = withNamedArgumentsRemoved(key);
-      return (
-        decamelize(keyWithoutNamedArguments).toLowerCase() ==
-        assembledToken.toLowerCase()
-      );
-    });
-
-    if (matchingKey) {
-      return { key: matchingKey, fragments: pathSegments.slice(0, j) };
-    }
+  if (!previousNode) {
+    throw new Error(
+        `Could not find node at path ${previous
+            .map((p) => p.fragments)
+            .flat()
+            .join(' ')}`,
+    );
   }
 
-  return undefined;
+  const pathSegmentsWithoutIts =
+      pathSegments[0] === 'its' ? pathSegments.slice(1) : pathSegments;
+
+  return resolvePathRecursively(previousNode, pathSegmentsWithoutIts);
 }
+
 
 export function resolvePathRecursively(
   node: SelectorTree,
@@ -122,6 +109,27 @@ export function resolvePathRecursively(
     pathSegments.slice(matchLength),
     [...resolvedSoFar, matchWithArg],
   );
+}
+
+export function resolvePath(
+    tree: SelectorTree,
+    pathSegments: string[],
+): ResolvedTarget | undefined {
+  const keys = Object.keys(tree);
+
+  for (let j = pathSegments.length; j > 0; j--) {
+    const assembledToken = pathSegments.slice(0, j).join(' ');
+    const matchingKey = keys.find((key) => {
+      const keyWithoutNamedArguments = withNamedArgumentsRemoved(key).trim();
+      return equalsCaseInsensitive(keyWithoutNamedArguments, assembledToken);
+    });
+
+    if (matchingKey) {
+      return { key: matchingKey, fragments: pathSegments.slice(0, j) };
+    }
+  }
+
+  return undefined;
 }
 
 interface PathSegmentGroup {
