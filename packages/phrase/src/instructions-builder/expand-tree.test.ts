@@ -189,5 +189,26 @@ test('should reject nested cross-recursion in templates', () => {
         _extends: 'bar*',
       },
     });
-  }).toThrowError(`Circular reference in template node "bar*": bar* -> qux* -> bar*`);
+  }).toThrowError(`Circular reference in template node "baz": bar* -> qux* -> bar*`);
+});
+
+
+test('should reject nested deep cross-recursion in templates', () => {
+  expect(() => {
+    expandTree({
+      foo: {
+        _extends: 'bar*',
+      },
+      "bar*": {
+        baz: {
+          _extends: 'qux*',
+        }
+      },
+      "qux*": {
+        quux: {
+          _extends: 'bar*',
+        }
+      },
+    });
+  }).toThrowError(`Circular reference in template node "quux": bar* -> qux* -> bar*`);
 });

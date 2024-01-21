@@ -10,7 +10,7 @@ export function expandTree(tree: SelectorTree): SelectorTree {
     const node = templateNodes[key];
 
     if (typeof node === 'object') {
-      templateNodes[key] = expandNode(node, templateNodes, [key]);
+      templateNodes[key] = expandNode(key, node, templateNodes, [key]);
     }
   });
 
@@ -22,14 +22,15 @@ function expandTreeWithTemplates(tree: SelectorTree, templateNodes: SelectorTree
 
   Object.keys(tree).forEach((key) => {
     if (!isTemplateNodeKey(key)) {
-      expandedTree[key] = expandNode(tree[key]!, templateNodes);
+      expandedTree[key] = expandNode(key, tree[key]!, templateNodes);
     }
   });
 
   return expandedTree;
 }
 
-function expandNode(node: Selector | SelectorTree,
+function expandNode(nodeKey: string,
+                    node: Selector | SelectorTree,
                     templateNodes: SelectorTree,
                     expandedKeys: string[] = []): SelectorTree | Selector {
   if (typeof node === 'string' || typeof node === 'function') {
@@ -41,7 +42,7 @@ function expandNode(node: Selector | SelectorTree,
   if (node._extends) {
     if (expandedKeys.includes(node._extends)) {
       const path = [...expandedKeys, node._extends];
-      throw new Error(`Circular reference in template node "${node._extends}": ${path.join(' -> ')}`);
+      throw new Error(`Circular reference in template node "${nodeKey}": ${path.join(' -> ')}`);
     }
 
     expandedKeys.push(node._extends);
@@ -56,7 +57,7 @@ function expandNode(node: Selector | SelectorTree,
       expandedNode = {...template, ...node};
       if (template._extends) {
         expandedNode._extends = template._extends;
-        expandedNode = expandNode(expandedNode, templateNodes, expandedKeys);
+        expandedNode = expandNode(nodeKey, expandedNode, templateNodes, expandedKeys);
       }
     } else {
       expandedNode = {_selector: template, ...node};
@@ -68,7 +69,8 @@ function expandNode(node: Selector | SelectorTree,
       throw new Error(`Template node "${key}" cannot be nested`);
     }
 
-    expandedNode[key] = expandNode(expandedNode[key]!, templateNodes, expandedKeys);
+    const expandedTree = expandedNode as SelectorTree;
+    expandedTree[key] = expandNode(key, expandedTree[key]!, templateNodes, expandedKeys);
   });
 
   return expandedNode;
