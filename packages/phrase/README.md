@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://github.com/documente/phrase">
+    <a href="https://github.com/documente/documente/tree/main/packages/phrase">
         <img alt="Logo for the Phrasé automated testing library" src="docs/phrase-logo.svg" title="Phrasé logo" width="200"/>
     </a>
 </p>
