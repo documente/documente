@@ -16,6 +16,7 @@ export function buildInstructions(
   externals: Externals,
   envVars: Record<string, string>,
 ): Instruction[] {
+  // const expandedTree = expandSelectorTree(selectorTree);
   const parser = new Parser();
   const sections = parser.parse(input);
   const blocks = sections.filter(
@@ -25,6 +26,7 @@ export function buildInstructions(
   const buildContext: BuildContext = {
     previousPath: [],
     selectorTree,
+    // expandedTree,
     externals,
     blocks,
     input,
