@@ -24,7 +24,7 @@ export function interpolate(
   token: Token,
   buildContext: BuildContext,
 ): string {
-  return str.replace(/{{(.*?)}}/g, (_, arg) => {
+  return str.replace(/(?<!\\){{(.*?)}}/g, (_, arg) => {
     if (args[arg]) {
       return args[arg];
     } else if (buildContext.envVars[arg]) {

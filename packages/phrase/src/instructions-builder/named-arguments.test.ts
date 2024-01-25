@@ -173,3 +173,40 @@ test('interpolated should use named arguments over env vars', () => {
     ),
   ).toEqual('foobar');
 });
+
+
+test('interpolate should ignore escaped moustaches', () => {
+  const args = {
+    foo: 'bar',
+    baz: 'qux',
+  };
+
+  [
+    { input: '\\{{foo}}', expected: '\\{{foo}}' },
+    { input: '{{foo}} \\{{baz}}', expected: 'bar \\{{baz}}' },
+  ].forEach(({ input, expected }) => {
+    const buildContext: BuildContext = {
+      input,
+      envVars: {},
+      blocks: [],
+      selectorTree: {},
+      externals: {},
+      previousPath: [],
+    };
+
+    expect(
+        interpolate(
+            input,
+            args,
+            {
+              line: 0,
+              column: 0,
+              value: input,
+              kind: 'generic',
+              index: 0,
+            },
+            buildContext,
+        ),
+    ).toEqual(expected);
+  });
+});
