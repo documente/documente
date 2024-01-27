@@ -96,8 +96,6 @@ export async function promptConfig(baseConfig, yesToAll, hasConfigFile) {
     }
   }
 
-  console.log(answers);
-
   return answers;
 }
 
