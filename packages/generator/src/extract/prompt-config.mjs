@@ -1,5 +1,8 @@
 import {optionKeys, options} from './options.mjs';
 import Enquirer from 'enquirer';
+import fs from 'fs';
+import {resolve} from 'path';
+import {warn} from './logger.mjs';
 
 export async function promptConfig(baseConfig = {}, yesToAll = false) {
   let answers = {};
@@ -10,7 +13,7 @@ export async function promptConfig(baseConfig = {}, yesToAll = false) {
         answers[optionKey] = baseConfig[optionKey];
         continue;
       } else {
-        console.log('Invalid value for', optionKey, 'in config file.');
+        warn('Invalid value for', optionKey, 'in config file.');
 
         if (yesToAll) {
           throw new Error('Invalid config file');
@@ -62,8 +65,33 @@ export async function promptConfig(baseConfig = {}, yesToAll = false) {
         answers = {...answers, ...answer};
         break;
       }
+      case 'filepath': {
+        for (;;) {
+          const answer = await Enquirer.prompt({
+            type: 'input',
+            name: optionKey,
+            message,
+            required: option.required,
+            initial,
+          });
+
+          if (answer === '' && !option.required) {
+            answers = {...answers, ...answer};
+            break;
+          }
+
+          if (isPathToExistingFile(answer[optionKey])) {
+            answers = {...answers, ...answer};
+            break;
+          } else {
+            console.log(`File ${answer[optionKey]} does not exist.`)
+          }
+        }
+      }
     }
   }
+
+  console.log(answers);
 
   return answers;
 }
@@ -84,5 +112,18 @@ function isValidValue(optionKey, value) {
       return typeof value === 'string';
     default:
       throw new Error(`Invalid option type: ${option.type}`);
+  }
+}
+
+function isPathToExistingFile(path) {
+  if (path == null) {
+    return false;
+  }
+
+  try {
+    fs.accessSync(resolve(process.cwd(), "./" + path), fs.constants.R_OK);
+    return true;
+  } catch (e) {
+    return false;
   }
 }

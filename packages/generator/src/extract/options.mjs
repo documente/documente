@@ -42,14 +42,14 @@ export const options = {
   },
   selectors: {
     description: 'Path to a YAML file containing selectors',
-    type: 'string',
+    type: 'filepath',
     required: true,
     promptMessage: 'What file contains your selectors?',
     defaultValue: 'selectors.yml',
   },
   externals : {
     description: 'Path to a Javascript file containing external functions',
-    type: 'string',
+    type: 'filepath',
     promptMessage: 'What file contains your external functions?',
   },
   testRegex: {
@@ -60,7 +60,7 @@ export const options = {
   },
   env: {
     description: 'Path to a YAML file containing environment variables',
-    type: 'string',
+    type: 'filepath',
     promptMessage: 'What file contains your environment variables?',
   },
 };

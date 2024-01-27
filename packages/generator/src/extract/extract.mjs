@@ -7,6 +7,7 @@ import { Splitter } from '@documente/phrase';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import {promptConfig} from './prompt-config.mjs';
+import {warn} from './logger.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -79,6 +80,10 @@ function readYamlFile(pathToYamlFile) {
 }
 
 function readAndParseYamlFile(pathToYamlFile) {
+  if (pathToYamlFile == null || pathToYamlFile === '') {
+    return null;
+  }
+
   const fileContent = readYamlFile(pathToYamlFile);
 
   try {
@@ -108,18 +113,6 @@ function validateInputFiles(inputGlobArray) {
   return files;
 }
 
-function checkExternals(pathToExternals) {
-  if (pathToExternals == null) {
-    return;
-  }
-
-  try {
-    fs.accessSync(resolve(process.cwd(), pathToExternals), fs.constants.R_OK);
-  } catch (e) {
-    throw new Error(`Error reading externals file: ${e.message}`);
-  }
-}
-
 export default async function run(pathToConfigFile, yesToAll) {
   if (pathToConfigFile == null) {
     pathToConfigFile = findConfigFile();
@@ -129,19 +122,19 @@ export default async function run(pathToConfigFile, yesToAll) {
     selectors,
     externals,
     outputDir,
-    inputArray,
+    inputFiles,
     runner,
     testRegex,
     env,
   } = await promptConfig(config, yesToAll);
-  checkExternals(externals);
+
   const outputPathToExternals =
-      externals == null
+      (externals == null || externals === '')
           ? null
           : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
-  const files = validateInputFiles(inputArray);
+  const files = validateInputFiles(inputFiles);
   const specTemplate = fs.readFileSync(
       resolve(__dirname, `../templates/${runner}-spec.mustache`),
       'utf8',
@@ -159,7 +152,7 @@ export default async function run(pathToConfigFile, yesToAll) {
     const matches = fileContent.match(regex);
 
     if (matches == null || matches.length === 0) {
-      console.log(chalk.yellow(`No test found in ${file}`));
+      warn(`No test found in ${file}`);
       return;
     }
 
