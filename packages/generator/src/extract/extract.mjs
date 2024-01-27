@@ -6,18 +6,11 @@ import Mustache from 'mustache';
 import { Splitter } from '@documente/phrase';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
+import { promptConfig } from './prompt-config.mjs';
+import { warn } from './logger.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-const defaultRegex = '```phras[ée]([^`]*)```';
-
-const supportedRunners = ['cypress', 'playwright'];
-
-const defaultOutputDirs = {
-  cypress: 'cypress/e2e',
-  playwright: 'tests',
-};
 
 const defaultExtensions = {
   cypress: '.cy.js',
@@ -34,7 +27,7 @@ function findConfigFile() {
 
   while (currentDirectory !== '/') {
     if (depth > 10) {
-      throw new Error('Too many directories traversed. Make sure you have a config file in your project.');
+      break;
     }
 
     const configFiles = glob(
@@ -54,7 +47,7 @@ function findConfigFile() {
     depth++;
   }
 
-  throw new Error('No config file found');
+  console.log('No config file found.');
 }
 
 function importConfigFile(pathToConfigFile) {
@@ -65,59 +58,6 @@ function importConfigFile(pathToConfigFile) {
   } catch (e) {
     throw new Error(`Error importing config file: ${e.message}`);
   }
-}
-
-function extractFromConfig(config) {
-  let { selectors, externals, input, outputDir, runner, testRegex, env } =
-    config;
-
-  let inputArray;
-
-  if (typeof input === 'string') {
-    inputArray = [input];
-  } else if (Array.isArray(input)) {
-    inputArray = input;
-  } else {
-    throw new Error('input must be a string or an array of strings');
-  }
-
-  if (typeof selectors !== 'string') {
-    throw new Error('selectors must be a string path to a YAML file');
-  }
-
-  if (externals != null && typeof externals !== 'string') {
-    throw new Error('externals must be a string path to a Javascript file');
-  }
-
-  if (env != null && typeof env !== 'string') {
-    throw new Error('env must be a string path to a YAML file');
-  }
-
-  if (!supportedRunners.includes(runner)) {
-    throw new Error(`runner must be one of ${supportedRunners.join(', ')}`);
-  }
-
-  if (outputDir == null) {
-    outputDir = defaultOutputDirs[runner];
-  } else if (typeof outputDir !== 'string') {
-    throw new Error('outputDir must be a string path to a directory');
-  }
-
-  if (testRegex == null) {
-    testRegex = defaultRegex;
-  } else if (typeof testRegex !== 'string') {
-    throw new Error('testRegex must be a string');
-  }
-
-  return {
-    selectors,
-    externals,
-    outputDir,
-    inputArray,
-    runner,
-    testRegex,
-    env,
-  };
 }
 
 function readYamlFile(pathToYamlFile) {
@@ -131,6 +71,10 @@ function readYamlFile(pathToYamlFile) {
 }
 
 function readAndParseYamlFile(pathToYamlFile) {
+  if (pathToYamlFile == null || pathToYamlFile === '') {
+    return null;
+  }
+
   const fileContent = readYamlFile(pathToYamlFile);
 
   try {
@@ -160,40 +104,28 @@ function validateInputFiles(inputGlobArray) {
   return files;
 }
 
-function checkExternals(pathToExternals) {
-  if (pathToExternals == null) {
-    return;
-  }
-
-  try {
-    fs.accessSync(resolve(process.cwd(), pathToExternals), fs.constants.R_OK);
-  } catch (e) {
-    throw new Error(`Error reading externals file: ${e.message}`);
-  }
-}
-
-export default function run(pathToConfigFile) {
+export default async function run(pathToConfigFile, yesToAll) {
   if (pathToConfigFile == null) {
     pathToConfigFile = findConfigFile();
   }
-  const config = importConfigFile(pathToConfigFile);
+  const config = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
   const {
     selectors,
     externals,
     outputDir,
-    inputArray,
+    inputFiles,
     runner,
     testRegex,
     env,
-  } = extractFromConfig(config);
-  checkExternals(externals);
+  } = await promptConfig(config, yesToAll, pathToConfigFile != null);
+
   const outputPathToExternals =
-    externals == null
+    externals == null || externals === ''
       ? null
       : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
-  const files = validateInputFiles(inputArray);
+  const files = validateInputFiles(inputFiles);
   const specTemplate = fs.readFileSync(
     resolve(__dirname, `../templates/${runner}-spec.mustache`),
     'utf8',
@@ -211,7 +143,7 @@ export default function run(pathToConfigFile) {
     const matches = fileContent.match(regex);
 
     if (matches == null || matches.length === 0) {
-      console.log(chalk.yellow(`No test found in ${file}`));
+      warn(`No test found in ${file}`);
       return;
     }
 
