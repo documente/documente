@@ -174,7 +174,6 @@ test('interpolated should use named arguments over env vars', () => {
   ).toEqual('foobar');
 });
 
-
 test('interpolate should ignore escaped moustaches', () => {
   const args = {
     foo: 'bar',
@@ -195,18 +194,18 @@ test('interpolate should ignore escaped moustaches', () => {
     };
 
     expect(
-        interpolate(
-            input,
-            args,
-            {
-              line: 0,
-              column: 0,
-              value: input,
-              kind: 'generic',
-              index: 0,
-            },
-            buildContext,
-        ),
+      interpolate(
+        input,
+        args,
+        {
+          line: 0,
+          column: 0,
+          value: input,
+          kind: 'generic',
+          index: 0,
+        },
+        buildContext,
+      ),
     ).toEqual(expected);
   });
 });

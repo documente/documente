@@ -6,6 +6,7 @@ import Mustache from 'mustache';
 import { Splitter } from '@documente/phrase';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
+import {promptConfig} from './prompt-config.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,7 +35,7 @@ function findConfigFile() {
 
   while (currentDirectory !== '/') {
     if (depth > 10) {
-      throw new Error('Too many directories traversed. Make sure you have a config file in your project.');
+      break;
     }
 
     const configFiles = glob(
@@ -54,7 +55,7 @@ function findConfigFile() {
     depth++;
   }
 
-  throw new Error('No config file found');
+  console.log('No config file found.');
 }
 
 function importConfigFile(pathToConfigFile) {
@@ -65,59 +66,6 @@ function importConfigFile(pathToConfigFile) {
   } catch (e) {
     throw new Error(`Error importing config file: ${e.message}`);
   }
-}
-
-function extractFromConfig(config) {
-  let { selectors, externals, input, outputDir, runner, testRegex, env } =
-    config;
-
-  let inputArray;
-
-  if (typeof input === 'string') {
-    inputArray = [input];
-  } else if (Array.isArray(input)) {
-    inputArray = input;
-  } else {
-    throw new Error('input must be a string or an array of strings');
-  }
-
-  if (typeof selectors !== 'string') {
-    throw new Error('selectors must be a string path to a YAML file');
-  }
-
-  if (externals != null && typeof externals !== 'string') {
-    throw new Error('externals must be a string path to a Javascript file');
-  }
-
-  if (env != null && typeof env !== 'string') {
-    throw new Error('env must be a string path to a YAML file');
-  }
-
-  if (!supportedRunners.includes(runner)) {
-    throw new Error(`runner must be one of ${supportedRunners.join(', ')}`);
-  }
-
-  if (outputDir == null) {
-    outputDir = defaultOutputDirs[runner];
-  } else if (typeof outputDir !== 'string') {
-    throw new Error('outputDir must be a string path to a directory');
-  }
-
-  if (testRegex == null) {
-    testRegex = defaultRegex;
-  } else if (typeof testRegex !== 'string') {
-    throw new Error('testRegex must be a string');
-  }
-
-  return {
-    selectors,
-    externals,
-    outputDir,
-    inputArray,
-    runner,
-    testRegex,
-    env,
-  };
 }
 
 function readYamlFile(pathToYamlFile) {
@@ -172,11 +120,11 @@ function checkExternals(pathToExternals) {
   }
 }
 
-export default function run(pathToConfigFile) {
+export default async function run(pathToConfigFile, yesToAll) {
   if (pathToConfigFile == null) {
     pathToConfigFile = findConfigFile();
   }
-  const config = importConfigFile(pathToConfigFile);
+  const config = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
   const {
     selectors,
     externals,
@@ -185,21 +133,21 @@ export default function run(pathToConfigFile) {
     runner,
     testRegex,
     env,
-  } = extractFromConfig(config);
+  } = await promptConfig(config, yesToAll);
   checkExternals(externals);
   const outputPathToExternals =
-    externals == null
-      ? null
-      : relative(outputDir, externals).replace(/\\/g, '/');
+      externals == null
+          ? null
+          : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
   const files = validateInputFiles(inputArray);
   const specTemplate = fs.readFileSync(
-    resolve(__dirname, `../templates/${runner}-spec.mustache`),
-    'utf8',
+      resolve(__dirname, `../templates/${runner}-spec.mustache`),
+      'utf8',
   );
 
-  fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
+  fs.mkdirSync(resolve(process.cwd(), outputDir), {recursive: true});
 
   let generatedFileCount = 0;
 
@@ -216,11 +164,11 @@ export default function run(pathToConfigFile) {
     }
 
     matches
-      .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
-      .forEach((block) => splitter.add(block));
+        .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
+        .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
-    const blocks = splitResult.blocks.map((block) => ({ block }));
+    const blocks = splitResult.blocks.map((block) => ({block}));
     const specs = splitResult.tests.map((spec, index) => ({
       spec,
       specNumber: index + 1,
@@ -245,17 +193,17 @@ export default function run(pathToConfigFile) {
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
-      chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
+        chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
     );
     generatedFileCount++;
   });
 
   console.log(
-    chalk.green(
-      `Generated ${generatedFileCount} spec files in ${resolve(
-        process.cwd(),
-        outputDir,
-      )}.`,
-    ),
+      chalk.green(
+          `Generated ${generatedFileCount} spec files in ${resolve(
+              process.cwd(),
+              outputDir,
+          )}.`,
+      ),
   );
 }
