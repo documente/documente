@@ -6,20 +6,11 @@ import Mustache from 'mustache';
 import { Splitter } from '@documente/phrase';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
-import {promptConfig} from './prompt-config.mjs';
-import {warn} from './logger.mjs';
+import { promptConfig } from './prompt-config.mjs';
+import { warn } from './logger.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-const defaultRegex = '```phras[ée]([^`]*)```';
-
-const supportedRunners = ['cypress', 'playwright'];
-
-const defaultOutputDirs = {
-  cypress: 'cypress/e2e',
-  playwright: 'tests',
-};
 
 const defaultExtensions = {
   cypress: '.cy.js',
@@ -126,21 +117,21 @@ export default async function run(pathToConfigFile, yesToAll) {
     runner,
     testRegex,
     env,
-  } = await promptConfig(config, yesToAll);
+  } = await promptConfig(config, yesToAll, pathToConfigFile != null);
 
   const outputPathToExternals =
-      (externals == null || externals === '')
-          ? null
-          : relative(outputDir, externals).replace(/\\/g, '/');
+    externals == null || externals === ''
+      ? null
+      : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
   const files = validateInputFiles(inputFiles);
   const specTemplate = fs.readFileSync(
-      resolve(__dirname, `../templates/${runner}-spec.mustache`),
-      'utf8',
+    resolve(__dirname, `../templates/${runner}-spec.mustache`),
+    'utf8',
   );
 
-  fs.mkdirSync(resolve(process.cwd(), outputDir), {recursive: true});
+  fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
 
   let generatedFileCount = 0;
 
@@ -157,11 +148,11 @@ export default async function run(pathToConfigFile, yesToAll) {
     }
 
     matches
-        .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
-        .forEach((block) => splitter.add(block));
+      .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
+      .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
-    const blocks = splitResult.blocks.map((block) => ({block}));
+    const blocks = splitResult.blocks.map((block) => ({ block }));
     const specs = splitResult.tests.map((spec, index) => ({
       spec,
       specNumber: index + 1,
@@ -186,17 +177,17 @@ export default async function run(pathToConfigFile, yesToAll) {
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
-        chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
+      chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
     );
     generatedFileCount++;
   });
 
   console.log(
-      chalk.green(
-          `Generated ${generatedFileCount} spec files in ${resolve(
-              process.cwd(),
-              outputDir,
-          )}.`,
-      ),
+    chalk.green(
+      `Generated ${generatedFileCount} spec files in ${resolve(
+        process.cwd(),
+        outputDir,
+      )}.`,
+    ),
   );
 }

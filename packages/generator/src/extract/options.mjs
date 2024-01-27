@@ -1,5 +1,3 @@
-
-
 const defaultOutputDirs = {
   playwright: 'e2e',
   cypress: 'cypress/e2e',
@@ -23,7 +21,7 @@ export const options = {
     type: 'choices',
     required: true,
     choices: ['playwright', 'cypress'],
-    promptMessage: 'Which test runner would you like to use?'
+    promptMessage: 'Which test runner would you like to use?',
   },
   inputFiles: {
     description: 'Glob pattern for input files or array of glob patterns',
@@ -47,13 +45,14 @@ export const options = {
     promptMessage: 'What file contains your selectors?',
     defaultValue: 'selectors.yml',
   },
-  externals : {
+  externals: {
     description: 'Path to a Javascript file containing external functions',
     type: 'filepath',
     promptMessage: 'What file contains your external functions?',
   },
   testRegex: {
-    description: 'The regex to use to find tests in the input files, or an array of regexes',
+    description:
+      'The regex to use to find tests in the input files, or an array of regexes',
     type: 'string',
     defaultValue: defaultRegex,
     promptMessage: 'What regex should we use to find your tests?',
