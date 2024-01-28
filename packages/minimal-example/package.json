@@ -11,9 +11,12 @@
     "url": "git+https://github.com/documente/minimal-example"
   },
   "scripts": {
+    "clean": "rimraf playwright-report test-results e2e",
     "generate-tests": "documente",
     "prepare-test": "npx playwright install --with-deps",
-    "test": "documente && playwright test",
+    "test:js": "documente && playwright test",
+    "test:ts": "documente --output-language typescript && playwright test",
+    "test": "run-s clean test:js clean test:ts",
     "test-ui": "playwright test --ui"
   },
   "devDependencies": {
