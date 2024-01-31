@@ -9,6 +9,7 @@ export const optionKeys = [
   'runner',
   'inputFiles',
   'outputDir',
+  'outputLanguage',
   'selectors',
   'externals',
   'testRegex',
@@ -37,6 +38,20 @@ export const options = {
       return defaultOutputDirs[options.runner];
     },
     promptMessage: 'Where would you like to output the generated tests?',
+  },
+  outputLanguage: {
+    description: 'The language to output the generated tests in',
+    type: 'choices',
+    choices: ['javascript', 'typescript'],
+    defaultValue: 'javascript',
+    promptMessage: 'What language would you like to output the tests in?',
+  },
+  outputModuleResolution: {
+    description: 'The module resolution to use for the generated tests',
+    type: 'choices',
+    choices: ['commonjs', 'esm'],
+    defaultValue: 'commonjs',
+    promptMessage: 'What module resolution would you like to use?',
   },
   selectors: {
     description: 'Path to a YAML file containing selectors',

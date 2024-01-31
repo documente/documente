@@ -8,13 +8,14 @@ import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import { promptConfig } from './prompt-config.mjs';
 import { warn } from './logger.mjs';
+import { optionKeys } from './options.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const defaultExtensions = {
-  cypress: '.cy.js',
-  playwright: '.spec.js',
+const defaultSuffix = {
+  cypress: '.cy',
+  playwright: '.spec',
 };
 
 // Starting from the current working directory, look for a config file named "documente.config.yml"
@@ -104,11 +105,24 @@ function validateInputFiles(inputGlobArray) {
   return files;
 }
 
-export default async function run(pathToConfigFile, yesToAll) {
+export default async function run(cliOptions) {
+  console.log('cliOptions', cliOptions);
+
+  const yesToAll = cliOptions.yes;
+  let pathToConfigFile = cliOptions.config;
+
   if (pathToConfigFile == null) {
     pathToConfigFile = findConfigFile();
   }
   const config = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
+
+  optionKeys.forEach((optionKey) => {
+    const cliOptionsValue = cliOptions[optionKey];
+    if (cliOptionsValue != null && cliOptionsValue !== '') {
+      config[optionKey] = cliOptionsValue;
+    }
+  });
+
   const {
     selectors,
     externals,
@@ -117,6 +131,7 @@ export default async function run(pathToConfigFile, yesToAll) {
     runner,
     testRegex,
     env,
+    outputLanguage,
   } = await promptConfig(config, yesToAll, pathToConfigFile != null);
 
   const outputPathToExternals =
@@ -173,7 +188,8 @@ export default async function run(pathToConfigFile, yesToAll) {
 
     const rendered = Mustache.render(specTemplate, view);
     const withoutExt = parse(sourceFileName).name;
-    const outputFileName = `${withoutExt}${defaultExtensions[runner]}`;
+    const ext = outputLanguage === 'typescript' ? '.ts' : '.js';
+    const outputFileName = `${withoutExt}${defaultSuffix[runner]}${ext}`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(

@@ -80,7 +80,7 @@ export async function promptConfig(baseConfig, yesToAll, hasConfigFile) {
             initial,
           });
 
-          if (answer === '' && !option.required) {
+          if (answer[optionKey] === '' && !option.required) {
             answers = { ...answers, ...answer };
             break;
           }
