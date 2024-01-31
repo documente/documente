@@ -1,5 +1,5 @@
-import { CypressRunner } from '@documente/runner-cypress';{{#pathToExternals}}
-import externals from '{{{.}}}';{{/pathToExternals}}
+{{#importWhat}}{ CypressRunner }{{/importWhat}}{{#importFrom}}@documente/runner-cypress{{/importFrom}};{{#pathToExternals}}
+{{#importWhat}}externals{{/importWhat}}{{#importFrom}}{{{pathToExternals}}}{{/importFrom}};{{/pathToExternals}}
 
 const selectorTree = `
 {{{selectorTree}}}
