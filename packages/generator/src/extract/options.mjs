@@ -10,6 +10,7 @@ export const optionKeys = [
   'inputFiles',
   'outputDir',
   'outputLanguage',
+  'outputModuleResolution',
   'selectors',
   'externals',
   'testRegex',
@@ -49,8 +50,8 @@ export const options = {
   outputModuleResolution: {
     description: 'The module resolution to use for the generated tests',
     type: 'choices',
-    choices: ['commonjs', 'esm'],
-    defaultValue: 'commonjs',
+    choices: ['cjs', 'esm'],
+    defaultValue: 'esm',
     promptMessage: 'What module resolution would you like to use?',
   },
   selectors: {

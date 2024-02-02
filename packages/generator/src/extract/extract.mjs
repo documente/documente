@@ -132,6 +132,7 @@ export default async function run(cliOptions) {
     testRegex,
     env,
     outputLanguage,
+    outputModuleResolution,
   } = await promptConfig(config, yesToAll, pathToConfigFile != null);
 
   const outputPathToExternals =
@@ -184,6 +185,28 @@ export default async function run(cliOptions) {
       sourceFileName: sourceFileName,
       specs,
       blocks,
+      importWhat: () =>
+        function (text, render) {
+          if (
+            outputLanguage === 'typescript' ||
+            outputModuleResolution === 'esm'
+          ) {
+            return `import ${render(text)}`;
+          } else {
+            return `const ${render(text)}`;
+          }
+        },
+      importFrom: () =>
+        function (text, render) {
+          if (
+            outputLanguage === 'typescript' ||
+            outputModuleResolution === 'esm'
+          ) {
+            return ` from '${render(text)}'`;
+          } else {
+            return ` = require('${render(text)}')`;
+          }
+        },
     };
 
     const rendered = Mustache.render(specTemplate, view);
