@@ -1,17 +1,18 @@
 import { getNode } from '../get-node';
-import { isQuoted } from '../quoted-text';
 import { SelectorTree } from '../interfaces/selector-tree.interface';
-import { ResolvedTarget } from '../interfaces/instructions.interface';
-import { withNamedArgumentsRemoved } from './named-arguments';
+import {
+  ResolvedTarget,
+  TypedFragment,
+} from '../interfaces/instructions.interface';
 import { equalsCaseInsensitive } from '../equalsCaseInsensitive';
 
 export function resolve(
   tree: SelectorTree,
-  pathSegments: string[],
+  fragments: TypedFragment[],
   previous: ResolvedTarget[],
 ): ResolvedTarget[] | undefined {
-  if (pathSegments[0] === 'its') {
-    if (pathSegments.length === 1) {
+  if (fragments[0]?.value === 'its') {
+    if (fragments.length === 1) {
       throw new Error(`Expected child path after "its" but got nothing.`);
     }
 
@@ -22,7 +23,7 @@ export function resolve(
 
   // Search relative to previous path
   if (previous?.length > 0) {
-    const match = resolveRelativeToPrevious(tree, previous, pathSegments);
+    const match = resolveRelativeToPrevious(tree, previous, fragments);
 
     if (match) {
       return [...previous, ...match];
@@ -30,12 +31,14 @@ export function resolve(
   }
 
   // If first segment is "its" we can stop here
-  if (pathSegments[0] === 'its') {
+  if (fragments[0]?.value === 'its') {
     const fullPath = [
       ...previous.map((p) => p.fragments).flat(),
-      ...pathSegments.slice(1),
+      ...fragments.slice(1),
     ];
-    throw new Error(`Cannot find child node at path ${fullPath.join(' ')}`);
+    throw new Error(
+      `Cannot find child node at path ${fullPath.map((f) => f.value).join(' ')}`,
+    );
   }
 
   // Search relative to previous parent
@@ -46,7 +49,7 @@ export function resolve(
       pathToParent.map((p) => p.key),
     );
 
-    const match = resolvePathRecursively(parentNode, pathSegments);
+    const match = resolvePathRecursively(parentNode, fragments);
 
     if (match) {
       return [...pathToParent, ...match];
@@ -54,13 +57,13 @@ export function resolve(
   }
 
   // Search from root
-  return resolvePathRecursively(tree, pathSegments);
+  return resolvePathRecursively(tree, fragments);
 }
 
 function resolveRelativeToPrevious(
   tree: SelectorTree,
   previous: ResolvedTarget[],
-  pathSegments: string[],
+  fragments: TypedFragment[],
 ): ResolvedTarget[] | undefined {
   const previousNode = getNode(
     tree,
@@ -70,97 +73,74 @@ function resolveRelativeToPrevious(
   if (!previousNode) {
     throw new Error(
       `Could not find node at path ${previous
-        .map((p) => p.fragments)
+        .map((p) => p.fragments.map((f) => f.value))
         .flat()
         .join(' ')}`,
     );
   }
 
   const pathSegmentsWithoutIts =
-    pathSegments[0] === 'its' ? pathSegments.slice(1) : pathSegments;
+    fragments[0]?.value === 'its' ? fragments.slice(1) : fragments;
 
   return resolvePathRecursively(previousNode, pathSegmentsWithoutIts);
 }
 
+/**
+ * Resolves a path in a tree recursively. This allows for construction such as "login form login field" where
+ * "login form" is a node and "login field" is a child of "login form".
+ * @param node - The node to start from.
+ * @param typedFragments - The path segments to resolve.
+ * @param resolvedSoFar - The resolved path segments so far.
+ */
 export function resolvePathRecursively(
   node: SelectorTree,
-  pathSegments: string[],
+  typedFragments: TypedFragment[],
   resolvedSoFar: ResolvedTarget[] = [],
 ): ResolvedTarget[] | undefined {
-  const groups = splitOnQuotedText(pathSegments);
-  const group = groups[0];
-
-  const match = resolvePath(node, group.segments);
+  const match = resolvePath(node, typedFragments);
 
   if (!match) {
     return undefined;
   }
 
-  const matchWithArg = { ...match, arg: group.arg };
-  const segmentsWithoutArgs = pathSegments.filter(
-    (segment) => !isQuoted(segment),
-  );
-
-  if (segmentsWithoutArgs.length === match.fragments.length) {
-    return [...resolvedSoFar, matchWithArg];
+  if (typedFragments.length === match.fragments.length) {
+    return [...resolvedSoFar, match];
   }
-
-  const matchLength = match.fragments.length + (group.arg ? 1 : 0);
 
   return resolvePathRecursively(
     node[match.key] as SelectorTree,
-    pathSegments.slice(matchLength),
-    [...resolvedSoFar, matchWithArg],
+    typedFragments.slice(match.fragments.length),
+    [...resolvedSoFar, match],
   );
 }
 
 export function resolvePath(
   tree: SelectorTree,
-  pathSegments: string[],
+  typedFragments: TypedFragment[],
 ): ResolvedTarget | undefined {
   const keys = Object.keys(tree);
 
-  for (let j = pathSegments.length; j > 0; j--) {
-    const assembledToken = pathSegments.slice(0, j).join(' ');
+  for (let j = typedFragments.length; j > 0; j--) {
+    const slicedFragments = typedFragments.slice(0, j);
+    const assembledToken = slicedFragments
+      .map((segment) => (segment.type === 'text' ? segment.value : '_'))
+      .join(' ');
     const matchingKey = keys.find((key) => {
-      const keyWithoutNamedArguments = withNamedArgumentsRemoved(key).trim();
+      const keyWithoutNamedArguments = withNamedArgumentsReplaced(key).trim();
       return equalsCaseInsensitive(keyWithoutNamedArguments, assembledToken);
     });
 
     if (matchingKey) {
-      return { key: matchingKey, fragments: pathSegments.slice(0, j) };
+      return {
+        key: matchingKey,
+        fragments: slicedFragments,
+      };
     }
   }
 
   return undefined;
 }
 
-interface PathSegmentGroup {
-  segments: string[];
-  arg?: string;
-}
-
-export function splitOnQuotedText(pathSegments: string[]): PathSegmentGroup[] {
-  const groups: PathSegmentGroup[] = [];
-  let currentSegments: string[] = [];
-
-  pathSegments.forEach((segment) => {
-    if (isQuoted(segment)) {
-      groups.push({
-        segments: currentSegments,
-        arg: segment,
-      });
-      currentSegments = [];
-    } else {
-      currentSegments.push(segment);
-    }
-  });
-
-  if (currentSegments.length > 0) {
-    groups.push({
-      segments: currentSegments,
-    });
-  }
-
-  return groups;
+function withNamedArgumentsReplaced(str: string): string {
+  return str.replace(/{{(.*?)}}/g, '_');
 }

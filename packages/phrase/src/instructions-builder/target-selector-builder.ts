@@ -3,8 +3,11 @@ import { BuildContext } from '../interfaces/build-context.interface';
 import { resolve } from './resolver';
 import { prettyPrintError } from '../error';
 import { SelectorTree, Selector } from '../interfaces/selector-tree.interface';
-import { ResolvedTarget } from '../interfaces/instructions.interface';
-import { unquoted } from '../quoted-text';
+import {
+  ResolvedTarget,
+  TypedFragment,
+} from '../interfaces/instructions.interface';
+import { isQuoted, unquoted } from '../quoted-text';
 import { interpolate } from './named-arguments';
 import { TargetSelector } from '../interfaces/target-selector.interface';
 import { extractNamedArguments } from './named-arguments-builder';
@@ -33,9 +36,15 @@ export function extractTargetSelector(
     };
   }
 
-  const targetFragments = target.map((t) => t.value);
+  const typedFragments: TypedFragment[] = target.map((token) => {
+    if (isQuoted(token.value)) {
+      return { type: 'arg', value: token.value };
+    } else {
+      return { type: 'text', value: token.value };
+    }
+  });
 
-  const targetPath = resolve(selectorTree, targetFragments, previousPath);
+  const targetPath = resolve(selectorTree, typedFragments, previousPath);
 
   if (!targetPath) {
     throw new Error(
@@ -108,18 +117,13 @@ function buildSelectors(
       selector = currentNode;
     }
 
-    const unquotedArgs = pathSegment.arg
-      ? [
-          unquoted(
-            interpolate(
-              pathSegment.arg,
-              namedArguments,
-              target[0],
-              buildContext,
-            ),
-          ),
-        ]
-      : [];
+    const unquotedArgs = pathSegment.fragments
+      .filter((fragment) => fragment.type === 'arg')
+      .map((fragment) => {
+        return unquoted(
+          interpolate(fragment.value, namedArguments, target[0], buildContext),
+        );
+      });
 
     const newNamedArguments = {
       ...extractNamedArguments(pathSegment.key.split(' '), unquotedArgs),
@@ -134,13 +138,10 @@ function buildSelectors(
       );
       selectors.push(interpolatedSelector);
     } else if (typeof selector === 'function') {
-      const arg = pathSegment.arg;
-
-      if (arg) {
-        selectors.push(selector(unquoted(arg)));
-      } else {
-        selectors.push(selector());
-      }
+      const args = pathSegment.fragments
+        .filter((fragment) => fragment.type === 'arg')
+        .map((fragment) => unquoted(fragment.value));
+      selectors.push(selector(...args));
     }
   });
 
