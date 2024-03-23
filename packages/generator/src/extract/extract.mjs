@@ -105,22 +105,14 @@ function validateInputFiles(inputGlobArray) {
   return files;
 }
 
-export default async function run(cliOptions) {
-  const yesToAll = cliOptions.yes;
-  let pathToConfigFile = cliOptions.config;
+let fileWatchers = [];
 
-  if (pathToConfigFile == null) {
-    pathToConfigFile = findConfigFile();
-  }
-  const config = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
+function resetFileWatchers() {
+  fileWatchers.forEach((watcher) => watcher.close());
+  fileWatchers = [];
+}
 
-  optionKeys.forEach((optionKey) => {
-    const cliOptionsValue = cliOptions[optionKey];
-    if (cliOptionsValue != null && cliOptionsValue !== '') {
-      config[optionKey] = cliOptionsValue;
-    }
-  });
-
+async function extractTests(config, yesToAll, watchMode, pathToConfigFile) {
   const {
     selectors,
     externals,
@@ -134,18 +126,65 @@ export default async function run(cliOptions) {
   } = await promptConfig(config, yesToAll, pathToConfigFile != null);
 
   const outputPathToExternals =
-    externals == null || externals === ''
-      ? null
-      : relative(outputDir, externals).replace(/\\/g, '/');
+      externals == null || externals === ''
+          ? null
+          : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
   const files = validateInputFiles(inputFiles);
   const specTemplate = fs.readFileSync(
-    resolve(__dirname, `../templates/${runner}-spec.mustache`),
-    'utf8',
+      resolve(__dirname, `../templates/${runner}-spec.mustache`),
+      'utf8',
   );
 
-  fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
+  if (watchMode) {
+    resetFileWatchers();
+
+    fileWatchers = files.map((file) => {
+      const watcher = fs.watch(file, (eventType) => {
+        if (eventType === 'change') {
+          console.log(chalk.yellow(`Input file ${file} has changed. Extracting tests...`));
+          extractTests(config, yesToAll, watchMode, pathToConfigFile);
+        }
+      });
+
+      fileWatchers.push(watcher);
+      return watcher;
+    });
+
+    fileWatchers.push(
+      fs.watch(selectors, (eventType) => {
+        if (eventType === 'change') {
+          console.log(chalk.yellow(`Selectors file ${selectors} has changed. Extracting tests...`));
+          extractTests(config, yesToAll, watchMode, pathToConfigFile);
+        }
+      })
+    );
+
+    if (externals != null) {
+      fileWatchers.push(
+          fs.watch(externals, (eventType) => {
+            if (eventType === 'change') {
+              console.log(chalk.yellow(`Externals file ${selectors} has changed. Extracting tests...`));
+              extractTests(config, yesToAll, watchMode, pathToConfigFile);
+            }
+          })
+      );
+    }
+
+    if (env != null) {
+      fileWatchers.push(
+          fs.watch(externals, (eventType) => {
+            if (eventType === 'change') {
+              console.log(chalk.yellow(`Environment file ${selectors} has changed. Extracting tests...`));
+              extractTests(config, yesToAll, watchMode, pathToConfigFile);
+            }
+          })
+      );
+    }
+  }
+
+  fs.mkdirSync(resolve(process.cwd(), outputDir), {recursive: true});
 
   let generatedFileCount = 0;
 
@@ -162,11 +201,11 @@ export default async function run(cliOptions) {
     }
 
     matches
-      .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
-      .forEach((block) => splitter.add(block));
+        .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
+        .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
-    const blocks = splitResult.blocks.map((block) => ({ block }));
+    const blocks = splitResult.blocks.map((block) => ({block}));
     const specs = splitResult.tests.map((spec, index) => ({
       spec,
       specNumber: index + 1,
@@ -184,27 +223,27 @@ export default async function run(cliOptions) {
       specs,
       blocks,
       importWhat: () =>
-        function (text, render) {
-          if (
-            outputLanguage === 'typescript' ||
-            outputModuleResolution === 'esm'
-          ) {
-            return `import ${render(text)}`;
-          } else {
-            return `const ${render(text)}`;
-          }
-        },
+          function (text, render) {
+            if (
+                outputLanguage === 'typescript' ||
+                outputModuleResolution === 'esm'
+            ) {
+              return `import ${render(text)}`;
+            } else {
+              return `const ${render(text)}`;
+            }
+          },
       importFrom: () =>
-        function (text, render) {
-          if (
-            outputLanguage === 'typescript' ||
-            outputModuleResolution === 'esm'
-          ) {
-            return ` from '${render(text)}'`;
-          } else {
-            return ` = require('${render(text)}')`;
-          }
-        },
+          function (text, render) {
+            if (
+                outputLanguage === 'typescript' ||
+                outputModuleResolution === 'esm'
+            ) {
+              return ` from '${render(text)}'`;
+            } else {
+              return ` = require('${render(text)}')`;
+            }
+          },
     };
 
     const rendered = Mustache.render(specTemplate, view);
@@ -214,17 +253,37 @@ export default async function run(cliOptions) {
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     console.log(
-      chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
+        chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
     );
     generatedFileCount++;
   });
 
   console.log(
-    chalk.green(
-      `Generated ${generatedFileCount} spec files in ${resolve(
-        process.cwd(),
-        outputDir,
-      )}.`,
-    ),
+      chalk.green(
+          `Generated ${generatedFileCount} spec files in ${resolve(
+              process.cwd(),
+              outputDir,
+          )}.`,
+      ),
   );
+}
+
+export default async function run(cliOptions) {
+  const yesToAll = cliOptions.yes;
+  let pathToConfigFile = cliOptions.config;
+
+  if (pathToConfigFile == null) {
+    pathToConfigFile = findConfigFile();
+  }
+  const config = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
+
+  optionKeys.forEach((optionKey) => {
+    const cliOptionsValue = cliOptions[optionKey];
+    if (cliOptionsValue != null && cliOptionsValue !== '') {
+      config[optionKey] = cliOptionsValue;
+    }
+  });
+
+  const watchMode = cliOptions.watch;
+  await extractTests(config, yesToAll, watchMode, pathToConfigFile);
 }

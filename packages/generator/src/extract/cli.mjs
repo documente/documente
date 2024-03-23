@@ -12,6 +12,7 @@ program
   .description('Extracts Phrasé tests from your Markdown documentation')
   .option('-c, --config <config>', 'path to the config file to use')
   .option('-y, --yes', 'yes to all prompts')
+  .option('-w, --watch', 'activate watch mode')
   .option('--debug', 'activate debug mode');
 
 optionKeys.forEach((optionKey) => {
