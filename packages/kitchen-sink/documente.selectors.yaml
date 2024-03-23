@@ -10,6 +10,10 @@ message2: '#message2'
 button3: '#button3'
 message3: '#message3'
 
+# Hover
+button4: '#button4'
+message7: '#message7'
+
 # Type
 input1: '#input1'
 
