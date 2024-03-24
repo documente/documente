@@ -1,6 +1,6 @@
-{{#importWhat}}{ expect, test }{{/importWhat}}{{#importFrom}}@playwright/test{{/importFrom}};
-{{#importWhat}}{ PlaywrightRunner }{{/importWhat}}{{#importFrom}}@documente/runner-playwright{{/importFrom}};{{#pathToExternals}}
-{{#importWhat}}externals{{/importWhat}}{{#importFrom}}{{{pathToExternals}}}{{/importFrom}};{{/pathToExternals}}
+import { expect, test } from '@playwright/test';
+import { PlaywrightRunner } from '@documente/runner-playwright';{{#pathToExternals}}
+import externals from '{{{.}}}';{{/pathToExternals}}
 
 const selectorTree = `
 {{{selectorTree}}}

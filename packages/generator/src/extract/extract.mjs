@@ -69,20 +69,18 @@ export async function extractTests(config, watchMode) {
     runner,
     testRegex,
     env,
-    outputLanguage,
-    outputModuleResolution,
   } = config;
 
   const outputPathToExternals =
-      externals == null || externals === ''
-          ? null
-          : relative(outputDir, externals).replace(/\\/g, '/');
+    externals == null || externals === ''
+      ? null
+      : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
   const files = validateInputFiles(inputFiles);
   const specTemplate = fs.readFileSync(
-      resolve(__dirname, `../templates/${runner}-spec.mustache`),
-      'utf8',
+    resolve(__dirname, `../templates/${runner}-spec.mustache`),
+    'utf8',
   );
 
   if (watchMode) {
@@ -91,7 +89,7 @@ export async function extractTests(config, watchMode) {
     });
   }
 
-  fs.mkdirSync(resolve(process.cwd(), outputDir), {recursive: true});
+  fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
 
   let generatedFileCount = 0;
 
@@ -108,11 +106,11 @@ export async function extractTests(config, watchMode) {
     }
 
     matches
-        .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
-        .forEach((block) => splitter.add(block));
+      .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
+      .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
-    const blocks = splitResult.blocks.map((block) => ({block}));
+    const blocks = splitResult.blocks.map((block) => ({ block }));
     const specs = splitResult.tests.map((spec, index) => ({
       spec,
       specNumber: index + 1,
@@ -129,34 +127,11 @@ export async function extractTests(config, watchMode) {
       sourceFileName: sourceFileName,
       specs,
       blocks,
-      importWhat: () =>
-          function (text, render) {
-            if (
-                outputLanguage === 'typescript' ||
-                outputModuleResolution === 'esm'
-            ) {
-              return `import ${render(text)}`;
-            } else {
-              return `const ${render(text)}`;
-            }
-          },
-      importFrom: () =>
-          function (text, render) {
-            if (
-                outputLanguage === 'typescript' ||
-                outputModuleResolution === 'esm'
-            ) {
-              return ` from '${render(text)}'`;
-            } else {
-              return ` = require('${render(text)}')`;
-            }
-          },
     };
 
     const rendered = Mustache.render(specTemplate, view);
     const withoutExt = parse(sourceFileName).name;
-    const ext = outputLanguage === 'typescript' ? '.ts' : '.js';
-    const outputFileName = `${withoutExt}${defaultSuffix[runner]}${ext}`;
+    const outputFileName = `${withoutExt}${defaultSuffix[runner]}.js`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     success(`Generated ${specs.length} tests in ${pathToOutputFile}.`);
