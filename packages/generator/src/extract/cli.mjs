@@ -3,6 +3,7 @@ import PACKAGE_VERSION from './package-version.cjs';
 import run from './extract.mjs';
 import chalk from 'chalk';
 import { optionKeys, options } from './options.mjs';
+import {error} from './logger.mjs';
 
 const program = new Command();
 
@@ -35,7 +36,7 @@ program.action(async (options) => {
     if (options.debug) {
       throw e;
     }
-    console.error(chalk.red(e.message));
+    error(e.message);
     process.exit(1);
   }
 });

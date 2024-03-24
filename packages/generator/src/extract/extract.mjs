@@ -7,7 +7,7 @@ import { Splitter } from '@documente/phrase';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import { promptConfig } from './prompt-config.mjs';
-import { warn } from './logger.mjs';
+import {info, success, warn} from './logger.mjs';
 import { optionKeys } from './options.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +21,7 @@ const defaultSuffix = {
 // Starting from the current working directory, look for a config file named "documente.config.yml"
 // or "documente.config.yaml". While config file is not found, go up one directory and repeat.
 function findConfigFile() {
-  console.log('Looking for config file...');
+  info('Looking for config file...');
   let currentDirectory = process.cwd();
 
   let depth = 0;
@@ -40,7 +40,7 @@ function findConfigFile() {
 
     if (configFiles.length > 0) {
       const found = resolve(currentDirectory, configFiles[0]);
-      console.log('Using config file:', found);
+      info('Using config file:', found);
       return found;
     }
 
@@ -48,7 +48,7 @@ function findConfigFile() {
     depth++;
   }
 
-  console.log('No config file found.');
+  info('No config file found.');
 }
 
 function importConfigFile(pathToConfigFile) {
@@ -112,6 +112,53 @@ function resetFileWatchers() {
   fileWatchers = [];
 }
 
+function watchFiles(files, selectors, externals, env, callback) {
+  resetFileWatchers();
+
+  fileWatchers = files.map((file) => {
+    const watcher = fs.watch(file, (eventType) => {
+      if (eventType === 'change') {
+        warn(`Input file ${file} has changed. Extracting tests...`);
+        callback();
+      }
+    });
+
+    fileWatchers.push(watcher);
+    return watcher;
+  });
+
+  fileWatchers.push(
+      fs.watch(selectors, (eventType) => {
+        if (eventType === 'change') {
+          warn(`Selectors file ${selectors} has changed. Extracting tests...`);
+          callback();
+        }
+      })
+  );
+
+  if (externals != null) {
+    fileWatchers.push(
+        fs.watch(externals, (eventType) => {
+          if (eventType === 'change') {
+            warn(`Externals file ${externals} has changed. Extracting tests...`);
+            callback();
+          }
+        })
+    );
+  }
+
+  if (env != null) {
+    fileWatchers.push(
+        fs.watch(env, (eventType) => {
+          if (eventType === 'change') {
+            warn(`Environment file ${env} has changed. Extracting tests...`);
+            callback();
+          }
+        })
+    );
+  }
+}
+
 async function extractTests(config, yesToAll, watchMode, pathToConfigFile) {
   const {
     selectors,
@@ -123,7 +170,7 @@ async function extractTests(config, yesToAll, watchMode, pathToConfigFile) {
     env,
     outputLanguage,
     outputModuleResolution,
-  } = await promptConfig(config, yesToAll, pathToConfigFile != null);
+  } = config;
 
   const outputPathToExternals =
       externals == null || externals === ''
@@ -138,50 +185,7 @@ async function extractTests(config, yesToAll, watchMode, pathToConfigFile) {
   );
 
   if (watchMode) {
-    resetFileWatchers();
-
-    fileWatchers = files.map((file) => {
-      const watcher = fs.watch(file, (eventType) => {
-        if (eventType === 'change') {
-          console.log(chalk.yellow(`Input file ${file} has changed. Extracting tests...`));
-          extractTests(config, yesToAll, watchMode, pathToConfigFile);
-        }
-      });
-
-      fileWatchers.push(watcher);
-      return watcher;
-    });
-
-    fileWatchers.push(
-      fs.watch(selectors, (eventType) => {
-        if (eventType === 'change') {
-          console.log(chalk.yellow(`Selectors file ${selectors} has changed. Extracting tests...`));
-          extractTests(config, yesToAll, watchMode, pathToConfigFile);
-        }
-      })
-    );
-
-    if (externals != null) {
-      fileWatchers.push(
-          fs.watch(externals, (eventType) => {
-            if (eventType === 'change') {
-              console.log(chalk.yellow(`Externals file ${selectors} has changed. Extracting tests...`));
-              extractTests(config, yesToAll, watchMode, pathToConfigFile);
-            }
-          })
-      );
-    }
-
-    if (env != null) {
-      fileWatchers.push(
-          fs.watch(externals, (eventType) => {
-            if (eventType === 'change') {
-              console.log(chalk.yellow(`Environment file ${selectors} has changed. Extracting tests...`));
-              extractTests(config, yesToAll, watchMode, pathToConfigFile);
-            }
-          })
-      );
-    }
+    watchFiles(files, config, yesToAll, watchMode, pathToConfigFile, selectors, externals, env);
   }
 
   fs.mkdirSync(resolve(process.cwd(), outputDir), {recursive: true});
@@ -252,20 +256,12 @@ async function extractTests(config, yesToAll, watchMode, pathToConfigFile) {
     const outputFileName = `${withoutExt}${defaultSuffix[runner]}${ext}`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
-    console.log(
-        chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
-    );
+    success(`Generated ${specs.length} tests in ${pathToOutputFile}.`);
     generatedFileCount++;
   });
 
-  console.log(
-      chalk.green(
-          `Generated ${generatedFileCount} spec files in ${resolve(
-              process.cwd(),
-              outputDir,
-          )}.`,
-      ),
-  );
+  const outputDirName = resolve(process.cwd(), outputDir);
+  success(`Generated ${generatedFileCount} spec files in ${outputDirName}.`);
 }
 
 export default async function run(cliOptions) {
@@ -275,14 +271,16 @@ export default async function run(cliOptions) {
   if (pathToConfigFile == null) {
     pathToConfigFile = findConfigFile();
   }
-  const config = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
+  const baseConfig = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
 
   optionKeys.forEach((optionKey) => {
     const cliOptionsValue = cliOptions[optionKey];
     if (cliOptionsValue != null && cliOptionsValue !== '') {
-      config[optionKey] = cliOptionsValue;
+      baseConfig[optionKey] = cliOptionsValue;
     }
   });
+
+  const config = await promptConfig(baseConfig, yesToAll, pathToConfigFile != null);
 
   const watchMode = cliOptions.watch;
   await extractTests(config, yesToAll, watchMode, pathToConfigFile);
