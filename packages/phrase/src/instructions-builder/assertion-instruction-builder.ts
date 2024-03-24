@@ -38,6 +38,7 @@ export function extractAssertionInstruction(
     statement.target,
     buildContext,
     namedArguments,
+    false,
   );
 
   const builtinAssertion = findBuiltinAssertion(
@@ -76,12 +77,10 @@ function findAssertionBlock(
   for (const block of blocks) {
     if (block.kind === 'assertion-block') {
       const blockActionName = block.header
-        .filter((a) => !a.value.startsWith('$'))
         .filter((a) => !isNamedArgument(a.value))
         .map((a) => a.value)
         .join(' ')
         .toLowerCase()
-        .split(' on ')[0]
         .trim();
 
       if (blockActionName === assertionName) {
@@ -89,7 +88,17 @@ function findAssertionBlock(
           statement.target,
           buildContext,
           namedArguments,
+          false,
         );
+
+        const requireTarget = block.fullHeader.some((a) =>
+          a.value.startsWith('$'),
+        );
+
+        if (requireTarget && !resolved) {
+          continue;
+        }
+
         const selectors = resolved?.selectors ?? null;
 
         const args = statement.assertion.filter((a) => isArgument(a.value));
