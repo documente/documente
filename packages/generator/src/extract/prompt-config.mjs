@@ -7,6 +7,10 @@ import { warn } from './logger.mjs';
 export async function promptConfig(baseConfig, yesToAll, hasConfigFile) {
   let answers = {};
 
+  if (hasConfigFile && baseConfig.sets) {
+    answers = { sets: baseConfig.sets };
+  }
+
   for (const optionKey of OPTION_KEYS) {
     const option = CLI_OPTIONS[optionKey];
     const baseValue = baseConfig[optionKey];
