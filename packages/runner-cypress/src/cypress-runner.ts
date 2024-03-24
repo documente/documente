@@ -26,6 +26,7 @@ declare const cy: {
     uncheck: () => void;
     select: (text: string) => void;
     should: (chainer: string, ...args: string[]) => void;
+    trigger: (event: string) => void;
   };
 };
 
@@ -123,6 +124,12 @@ export class CypressRunner {
       case 'double_click':
         if (this.targetIsDefined(selectors, action)) {
           cy.get(selectors.join(' ')).dblclick();
+        }
+        break;
+      case 'hover':
+        if (this.targetIsDefined(selectors, action)) {
+          cy.get(selectors.join(' ')).trigger('mouseenter');
+          cy.get(selectors.join(' ')).trigger('mouseover');
         }
         break;
       case 'right_click':

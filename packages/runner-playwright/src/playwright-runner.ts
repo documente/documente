@@ -103,6 +103,11 @@ export class PlaywrightRunner {
           await page.locator(selectors.join(' ')).click({ button: 'right' });
         }
         break;
+      case 'hover':
+        if (this.targetIsDefined(selectors, action)) {
+          await page.locator(selectors.join(' ')).hover();
+        }
+        break;
       case 'scroll':
         if (this.targetIsDefined(selectors, action)) {
           await page.locator(selectors.join(' ')).scrollIntoViewIfNeeded();

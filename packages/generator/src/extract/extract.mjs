@@ -106,8 +106,6 @@ function validateInputFiles(inputGlobArray) {
 }
 
 export default async function run(cliOptions) {
-  console.log('cliOptions', cliOptions);
-
   const yesToAll = cliOptions.yes;
   let pathToConfigFile = cliOptions.config;
 
