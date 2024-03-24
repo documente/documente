@@ -1,11 +1,11 @@
-const defaultOutputDirs = {
+const DEFAULT_OUTPUT_DIRS = {
   playwright: 'e2e',
   cypress: 'cypress/e2e',
 };
 
-const defaultRegex = '```phras[ée]([^`]*)```';
+const DEFAULT_REGEX = '```phras[ée]([^`]*)```';
 
-export const optionKeys = [
+export const OPTION_KEYS = [
   'runner',
   'inputFiles',
   'outputDir',
@@ -17,7 +17,7 @@ export const optionKeys = [
   'env',
 ];
 
-export const options = {
+export const CLI_OPTIONS = {
   runner: {
     description: 'The test runner to use',
     type: 'choices',
@@ -36,7 +36,7 @@ export const options = {
     description: 'Path to a directory to output the generated tests',
     type: 'string',
     defaultValueFn: (options) => {
-      return defaultOutputDirs[options.runner];
+      return DEFAULT_OUTPUT_DIRS[options.runner];
     },
     promptMessage: 'Where would you like to output the generated tests?',
   },
@@ -70,7 +70,7 @@ export const options = {
     description:
       'The regex to use to find tests in the input files, or an array of regexes',
     type: 'string',
-    defaultValue: defaultRegex,
+    defaultValue: DEFAULT_REGEX,
     promptMessage: 'What regex should we use to find your tests?',
   },
   env: {

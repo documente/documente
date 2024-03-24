@@ -1,9 +1,8 @@
 import { Command } from 'commander';
 import PACKAGE_VERSION from './package-version.cjs';
-import run from './extract.mjs';
-import chalk from 'chalk';
-import { optionKeys, options } from './options.mjs';
+import { OPTION_KEYS, CLI_OPTIONS } from './cli-options.mjs';
 import {error} from './logger.mjs';
+import run from './run.mjs';
 
 const program = new Command();
 
@@ -16,8 +15,8 @@ program
   .option('-w, --watch', 'activate watch mode')
   .option('--debug', 'activate debug mode');
 
-optionKeys.forEach((optionKey) => {
-  const option = options[optionKey];
+OPTION_KEYS.forEach((optionKey) => {
+  const option = CLI_OPTIONS[optionKey];
   const optionName = optionKey.replace(/([A-Z])/g, '-$1').toLowerCase();
   const optionDescription = option.description;
   const argName = option.required ? `<${optionName}>` : `[${optionName}]`;

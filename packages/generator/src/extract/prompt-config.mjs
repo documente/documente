@@ -1,4 +1,4 @@
-import { optionKeys, options } from './options.mjs';
+import { OPTION_KEYS, CLI_OPTIONS } from './cli-options.mjs';
 import Enquirer from 'enquirer';
 import fs from 'fs';
 import { resolve } from 'path';
@@ -7,8 +7,8 @@ import { warn } from './logger.mjs';
 export async function promptConfig(baseConfig, yesToAll, hasConfigFile) {
   let answers = {};
 
-  for (const optionKey of optionKeys) {
-    const option = options[optionKey];
+  for (const optionKey of OPTION_KEYS) {
+    const option = CLI_OPTIONS[optionKey];
     const baseValue = baseConfig[optionKey];
     const initial = option.defaultValueFn
       ? option.defaultValueFn(answers)
@@ -89,7 +89,7 @@ export async function promptConfig(baseConfig, yesToAll, hasConfigFile) {
             answers = { ...answers, ...answer };
             break;
           } else {
-            console.log(`File ${answer[optionKey]} does not exist.`);
+            warn(`File ${answer[optionKey]} does not exist.`);
           }
         }
       }
@@ -100,7 +100,7 @@ export async function promptConfig(baseConfig, yesToAll, hasConfigFile) {
 }
 
 function isValidValue(optionKey, value) {
-  const option = options[optionKey];
+  const option = CLI_OPTIONS[optionKey];
 
   switch (option.type) {
     case 'choices':
