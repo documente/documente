@@ -5,10 +5,8 @@ import { globSync as glob } from 'glob';
 import Mustache from 'mustache';
 import { Splitter } from '@documente/phrase';
 import { fileURLToPath } from 'node:url';
-import chalk from 'chalk';
-import { promptConfig } from './prompt-config.mjs';
-import { warn } from './logger.mjs';
-import { optionKeys } from './options.mjs';
+import { success, warn } from './logger.mjs';
+import { watchFiles } from './watch.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,49 +15,6 @@ const defaultSuffix = {
   cypress: '.cy',
   playwright: '.spec',
 };
-
-// Starting from the current working directory, look for a config file named "documente.config.yml"
-// or "documente.config.yaml". While config file is not found, go up one directory and repeat.
-function findConfigFile() {
-  console.log('Looking for config file...');
-  let currentDirectory = process.cwd();
-
-  let depth = 0;
-
-  while (currentDirectory !== '/') {
-    if (depth > 10) {
-      break;
-    }
-
-    const configFiles = glob(
-      ['documente.config.yml', 'documente.config.yaml'],
-      {
-        cwd: currentDirectory,
-      },
-    );
-
-    if (configFiles.length > 0) {
-      const found = resolve(currentDirectory, configFiles[0]);
-      console.log('Using config file:', found);
-      return found;
-    }
-
-    currentDirectory = dirname(currentDirectory);
-    depth++;
-  }
-
-  console.log('No config file found.');
-}
-
-function importConfigFile(pathToConfigFile) {
-  try {
-    return YAML.parse(
-      fs.readFileSync(resolve(process.cwd(), pathToConfigFile), 'utf8'),
-    );
-  } catch (e) {
-    throw new Error(`Error importing config file: ${e.message}`);
-  }
-}
 
 function readYamlFile(pathToYamlFile) {
   try {
@@ -105,22 +60,7 @@ function validateInputFiles(inputGlobArray) {
   return files;
 }
 
-export default async function run(cliOptions) {
-  const yesToAll = cliOptions.yes;
-  let pathToConfigFile = cliOptions.config;
-
-  if (pathToConfigFile == null) {
-    pathToConfigFile = findConfigFile();
-  }
-  const config = pathToConfigFile ? importConfigFile(pathToConfigFile) : {};
-
-  optionKeys.forEach((optionKey) => {
-    const cliOptionsValue = cliOptions[optionKey];
-    if (cliOptionsValue != null && cliOptionsValue !== '') {
-      config[optionKey] = cliOptionsValue;
-    }
-  });
-
+export async function extractTests(config, watchMode) {
   const {
     selectors,
     externals,
@@ -131,21 +71,27 @@ export default async function run(cliOptions) {
     env,
     outputLanguage,
     outputModuleResolution,
-  } = await promptConfig(config, yesToAll, pathToConfigFile != null);
+  } = config;
 
   const outputPathToExternals =
-    externals == null || externals === ''
-      ? null
-      : relative(outputDir, externals).replace(/\\/g, '/');
+      externals == null || externals === ''
+          ? null
+          : relative(outputDir, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
   const files = validateInputFiles(inputFiles);
   const specTemplate = fs.readFileSync(
-    resolve(__dirname, `../templates/${runner}-spec.mustache`),
-    'utf8',
+      resolve(__dirname, `../templates/${runner}-spec.mustache`),
+      'utf8',
   );
 
-  fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
+  if (watchMode) {
+    watchFiles(files, selectors, externals, env, () => {
+      extractTests(config, watchMode);
+    });
+  }
+
+  fs.mkdirSync(resolve(process.cwd(), outputDir), {recursive: true});
 
   let generatedFileCount = 0;
 
@@ -162,11 +108,11 @@ export default async function run(cliOptions) {
     }
 
     matches
-      .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
-      .forEach((block) => splitter.add(block));
+        .map((block) => block.replace(new RegExp(testRegex), '$1').trim())
+        .forEach((block) => splitter.add(block));
 
     const splitResult = splitter.split();
-    const blocks = splitResult.blocks.map((block) => ({ block }));
+    const blocks = splitResult.blocks.map((block) => ({block}));
     const specs = splitResult.tests.map((spec, index) => ({
       spec,
       specNumber: index + 1,
@@ -184,27 +130,27 @@ export default async function run(cliOptions) {
       specs,
       blocks,
       importWhat: () =>
-        function (text, render) {
-          if (
-            outputLanguage === 'typescript' ||
-            outputModuleResolution === 'esm'
-          ) {
-            return `import ${render(text)}`;
-          } else {
-            return `const ${render(text)}`;
-          }
-        },
+          function (text, render) {
+            if (
+                outputLanguage === 'typescript' ||
+                outputModuleResolution === 'esm'
+            ) {
+              return `import ${render(text)}`;
+            } else {
+              return `const ${render(text)}`;
+            }
+          },
       importFrom: () =>
-        function (text, render) {
-          if (
-            outputLanguage === 'typescript' ||
-            outputModuleResolution === 'esm'
-          ) {
-            return ` from '${render(text)}'`;
-          } else {
-            return ` = require('${render(text)}')`;
-          }
-        },
+          function (text, render) {
+            if (
+                outputLanguage === 'typescript' ||
+                outputModuleResolution === 'esm'
+            ) {
+              return ` from '${render(text)}'`;
+            } else {
+              return ` = require('${render(text)}')`;
+            }
+          },
     };
 
     const rendered = Mustache.render(specTemplate, view);
@@ -213,18 +159,10 @@ export default async function run(cliOptions) {
     const outputFileName = `${withoutExt}${defaultSuffix[runner]}${ext}`;
     const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
-    console.log(
-      chalk.green(`Generated ${specs.length} tests in ${pathToOutputFile}.`),
-    );
+    success(`Generated ${specs.length} tests in ${pathToOutputFile}.`);
     generatedFileCount++;
   });
 
-  console.log(
-    chalk.green(
-      `Generated ${generatedFileCount} spec files in ${resolve(
-        process.cwd(),
-        outputDir,
-      )}.`,
-    ),
-  );
+  const outputDirName = resolve(process.cwd(), outputDir);
+  success(`Generated ${generatedFileCount} spec files in ${outputDirName}.`);
 }
