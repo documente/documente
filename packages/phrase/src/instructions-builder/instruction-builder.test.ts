@@ -99,8 +99,10 @@ test('should build an assertion', () => {
     selectors: ['h1'],
     target: [
       {
-        arg: undefined,
-        fragments: ['welcome', 'message'],
+        fragments: ['welcome', 'message'].map((f) => ({
+          value: f,
+          type: 'text',
+        })),
         key: 'welcome message',
       },
     ],
@@ -126,8 +128,10 @@ test('should build an assertion with quoted text argument', () => {
     selectors: ['h1'],
     target: [
       {
-        arg: undefined,
-        fragments: ['welcome', 'message'],
+        fragments: ['welcome', 'message'].map((f) => ({
+          value: f,
+          type: 'text',
+        })),
         key: 'welcome message',
       },
     ],
@@ -214,7 +218,7 @@ test('should build instructions with an assertion block', () => {
   expect(assertion.selectors).toEqual(['button']);
   expect(assertion.args).toEqual([]);
   expect(assertion.target).toEqual([
-    { arg: undefined, fragments: ['button'], key: 'button' },
+    { fragments: [{ value: 'button', type: 'text' }], key: 'button' },
   ]);
 
   const resolvedAssertion = assertion as BuiltInAssertion;
@@ -265,14 +269,14 @@ Line 4, column 19:
 
 test('should handle interpolated arguments in selectors', () => {
   const instructions = buildInstructions(
-    `when I click button
+    `when I click the "foo" button
 then it should contain label "foobar"
 
 for $element to contain label {{content}}:
 - its label with text "{{content}}" should exist`,
     {
-      button: {
-        _selector: 'button',
+      'the {{label}} button': {
+        _selector: 'button[label="{{label}}"]',
         'label with text {{label}}': 'label[text="{{label}}"]',
       },
     },
@@ -283,7 +287,7 @@ for $element to contain label {{content}}:
   const firstBuiltinAssertion: BuiltInAssertion =
     instructions[1] as BuiltInAssertion;
   expect(firstBuiltinAssertion.selectors).toEqual([
-    'button',
+    'button[label="foo"]',
     'label[text="foobar"]',
   ]);
 });

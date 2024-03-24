@@ -3,10 +3,14 @@ import { Token } from './token.interface';
 import { BuiltinActionCode } from '../instructions-builder/builtin-actions';
 import { BuiltinAssertionCode } from '../instructions-builder/builtin-assertions';
 
+export interface TypedFragment {
+  type: 'text' | 'arg';
+  value: string;
+}
+
 export interface ResolvedTarget {
-  fragments: string[];
+  fragments: TypedFragment[];
   key: string;
-  arg?: string;
 }
 
 interface BaseActionInstruction {
