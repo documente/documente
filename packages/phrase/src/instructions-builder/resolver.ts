@@ -120,6 +120,25 @@ export function resolvePath(
 ): ResolvedTarget | undefined {
   const keys = Object.keys(tree);
 
+  // Try with exact match (do not consider quoted text as arguments)
+  for (let j = typedFragments.length; j > 0; j--) {
+    const slicedFragments = typedFragments.slice(0, j);
+    const assembledToken = slicedFragments
+      .map((segment) => segment.value)
+      .join(' ');
+    const matchingKey = keys.find((key) => {
+      const keyWithoutNamedArguments = withNamedArgumentsReplaced(key).trim();
+      return equalsCaseInsensitive(keyWithoutNamedArguments, assembledToken);
+    });
+
+    if (matchingKey) {
+      return {
+        key: matchingKey,
+        fragments: slicedFragments,
+      };
+    }
+  }
+
   for (let j = typedFragments.length; j > 0; j--) {
     const slicedFragments = typedFragments.slice(0, j);
     const assembledToken = slicedFragments

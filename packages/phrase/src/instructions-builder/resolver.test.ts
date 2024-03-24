@@ -65,6 +65,18 @@ test('resolvePath should resolve fragments with quoted text', () => {
   });
 });
 
+test('resolvePath should resolve node with quoted text', () => {
+  const typedFragments = typed(['the', '"red"', 'button']);
+  const tree = {
+    'the "red" button': 'button[label="{{label}}"]',
+  };
+  const result = resolvePath(tree, typedFragments);
+  expect(result).toEqual({
+    key: 'the "red" button',
+    fragments: typedFragments,
+  });
+});
+
 test('resolvePathRecursively should resolve a nested node', () => {
   const tree = {
     foo: {
