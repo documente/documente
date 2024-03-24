@@ -1,6 +1,6 @@
 import fs from 'fs';
 import YAML from 'yaml';
-import { basename, dirname, resolve, relative, parse } from 'path';
+import { basename, dirname, parse, relative, resolve } from 'path';
 import { globSync as glob } from 'glob';
 import Mustache from 'mustache';
 import { Splitter } from '@documente/phrase';
@@ -54,13 +54,29 @@ function validateInputFiles(inputGlobArray) {
   const files = getInputFiles(inputGlobArray);
 
   if (files.length === 0) {
-    throw new Error('No input files found');
+    throw new Error(`No input files found matching "${inputGlobArray}".`);
   }
 
   return files;
 }
 
 export async function extractTests(config, watchMode) {
+  if (config.sets) {
+    if (!Array.isArray(config.sets)) {
+      throw new Error('sets must be an Array.');
+    }
+
+    for (const set of config.sets) {
+      await extractTestsFromSet(config, watchMode, set);
+    }
+  } else {
+    await extractTestsFromSet(config, watchMode, null);
+  }
+}
+
+async function extractTestsFromSet(config, watchMode, setConfig) {
+  setConfig = setConfig ?? {};
+
   const {
     selectors,
     externals,
@@ -69,7 +85,7 @@ export async function extractTests(config, watchMode) {
     runner,
     testRegex,
     env,
-  } = config;
+  } = { ...config, ...setConfig };
 
   const outputPathToExternals =
     externals == null || externals === ''
