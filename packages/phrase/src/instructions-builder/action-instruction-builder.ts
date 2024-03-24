@@ -115,7 +115,12 @@ function buildArgsAndSelectors(
 ): ArgsAndSelectors {
   const { target, args } = matchResult;
 
-  const resolved = extractTargetSelector(target, buildContext, namedArguments);
+  const resolved = extractTargetSelector(
+    target,
+    buildContext,
+    namedArguments,
+    true,
+  );
   const selectors = resolved?.selectors ?? null;
 
   const interpolatedArgs = args.map((arg) =>

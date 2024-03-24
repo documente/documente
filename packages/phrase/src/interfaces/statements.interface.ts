@@ -29,6 +29,7 @@ export type Statement =
 interface BaseBlock {
   kind: string;
   header: Token[];
+  fullHeader: Token[];
   body: Statement[];
   source: string;
 }

@@ -16,6 +16,7 @@ export function extractTargetSelector(
   target: Token[],
   buildContext: BuildContext,
   namedArguments: Record<string, string>,
+  requireTarget: boolean,
 ): TargetSelector | null {
   if (target.length === 0) {
     return null;
@@ -47,15 +48,20 @@ export function extractTargetSelector(
   const targetPath = resolve(selectorTree, typedFragments, previousPath);
 
   if (!targetPath) {
-    throw new Error(
-      prettyPrintError(
-        `Could not resolve target path for "${target
-          .map((t) => t.value)
-          .join(' ')}"`,
-        input,
-        target[0],
-      ),
-    );
+    if (requireTarget) {
+      throw new Error(
+        prettyPrintError(
+          `Could not resolve target path for "${target
+            .map((t) => t.value)
+            .join(' ')}"`,
+          input,
+          target[0],
+        ),
+      );
+    }
+
+    // buildContext.previousPath = [];
+    return null;
   }
 
   buildContext.previousPath = targetPath;

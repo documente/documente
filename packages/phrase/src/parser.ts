@@ -128,6 +128,7 @@ export class Parser {
       return {
         kind: 'assertion-block',
         header: fullHeader.slice(indexOfTo + 1),
+        fullHeader,
         body: this.parseBullets(),
         source: this.getSource(startIndex),
       } satisfies AssertionBlock;

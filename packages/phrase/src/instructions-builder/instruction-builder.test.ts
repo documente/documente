@@ -239,6 +239,36 @@ test('should build instructions with a builtin negated assertion', () => {
   expect(builtinAssertion.code).toBe('not exist');
 });
 
+test('should build assertion without target', () => {
+  const instructions = buildInstructions(
+    `when I click button then the dialog should open
+    
+    for the dialog to open:
+    - it should be visible`,
+    { button: 'button' },
+    {},
+    {},
+  );
+
+  const builtinAssertion = instructions[1] as BuiltInAssertion;
+  expect(builtinAssertion.kind).toBe('builtin-assertion');
+  expect(builtinAssertion.code).toBe('be visible');
+});
+
+test('should reject assertion with missing target', () => {
+  expect(() =>
+    buildInstructions(
+      `when I click button then the dialog should open
+    
+    for $target to open:
+    - it should be visible`,
+      { button: 'button' },
+      {},
+      {},
+    ),
+  ).toThrow();
+});
+
 test('should reject unknown assertions', () => {
   expect(() =>
     buildInstructions(
