@@ -9,6 +9,8 @@ export const BuiltinActionCodes = [
   'double_click',
   'right_click',
 
+  'hover',
+
   'type',
   'clear',
 
@@ -41,6 +43,8 @@ export const BuiltinActionPatterns: Record<string, BuiltinActionCode> = {
   'right-click $target': 'right_click',
   'rightclick on $target': 'right_click',
   'rightclick $target': 'right_click',
+  'hover $target': 'hover',
+  'hover on $target': 'hover',
   'type {{text}} on $target': 'type',
   'type {{text}} into $target': 'type',
   'type {{text}} in $target': 'type',
