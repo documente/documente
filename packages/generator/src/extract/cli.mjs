@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import PACKAGE_VERSION from './package-version.cjs';
 import { OPTION_KEYS, CLI_OPTIONS } from './cli-options.mjs';
-import {error} from './logger.mjs';
+import { error } from './logger.mjs';
 import run from './run.mjs';
 
 const program = new Command();

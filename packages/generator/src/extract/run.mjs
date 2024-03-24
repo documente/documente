@@ -1,9 +1,9 @@
-import {OPTION_KEYS} from './cli-options.mjs';
-import {promptConfig} from './prompt-config.mjs';
-import {extractTests} from './extract.mjs';
-import {info} from './logger.mjs';
-import {globSync as glob} from 'glob';
-import {dirname, resolve} from 'path';
+import { OPTION_KEYS } from './cli-options.mjs';
+import { promptConfig } from './prompt-config.mjs';
+import { extractTests } from './extract.mjs';
+import { info } from './logger.mjs';
+import { globSync as glob } from 'glob';
+import { dirname, resolve } from 'path';
 import YAML from 'yaml';
 import fs from 'fs';
 
@@ -21,15 +21,15 @@ function findConfigFile() {
     }
 
     const configFiles = glob(
-        ['documente.config.yml', 'documente.config.yaml'],
-        {
-          cwd: currentDirectory,
-        },
+      ['documente.config.yml', 'documente.config.yaml'],
+      {
+        cwd: currentDirectory,
+      },
     );
 
     if (configFiles.length > 0) {
       const found = resolve(currentDirectory, configFiles[0]);
-      info('Using config file:', found);
+      info(`Using config file: ${found}`);
       return found;
     }
 
@@ -43,7 +43,7 @@ function findConfigFile() {
 function importConfigFile(pathToConfigFile) {
   try {
     return YAML.parse(
-        fs.readFileSync(resolve(process.cwd(), pathToConfigFile), 'utf8'),
+      fs.readFileSync(resolve(process.cwd(), pathToConfigFile), 'utf8'),
     );
   } catch (e) {
     throw new Error(`Error importing config file: ${e.message}`);
@@ -66,7 +66,11 @@ export default async function run(cliOptions) {
     }
   });
 
-  const config = await promptConfig(baseConfig, yesToAll, pathToConfigFile != null);
+  const config = await promptConfig(
+    baseConfig,
+    yesToAll,
+    pathToConfigFile != null,
+  );
 
   const watchMode = cliOptions.watch;
   await extractTests(config, watchMode);
