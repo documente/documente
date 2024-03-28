@@ -57,6 +57,30 @@ test('should build an action without arguments', () => {
     selectors: ['form', 'button'],
     action: 'click',
     args: [],
+    screenshotName: null,
+  } satisfies ActionInstruction);
+});
+
+test('should build an action with a screenshot command', () => {
+  const tree: SelectorTree = {
+    form: {
+      _selector: 'form',
+      button: 'button',
+    },
+  };
+
+  const instructions = buildInstructions(
+    'when I click form button (screenshot "click.png") then it should be visible',
+    tree,
+    {},
+    {},
+  );
+  expect(instructions[0]).toEqual({
+    kind: 'builtin-action',
+    selectors: ['form', 'button'],
+    action: 'click',
+    args: [],
+    screenshotName: 'click.png',
   } satisfies ActionInstruction);
 });
 
@@ -79,6 +103,7 @@ test('should build an action with arguments', () => {
     selectors: ['form', 'button'],
     action: 'type',
     args: ['foo'],
+    screenshotName: null,
   } satisfies ActionInstruction);
 });
 
@@ -108,6 +133,37 @@ test('should build an assertion', () => {
     ],
     code: 'be visible',
     args: [],
+    screenshotName: null,
+  } satisfies BuiltInAssertion);
+});
+
+test('should build an assertion with parenthesized command', () => {
+  const tree: SelectorTree = {
+    button: 'button',
+    'welcome message': 'h1',
+  };
+
+  const instructions = buildInstructions(
+    'when I click on button then welcome message should be visible (screenshot "welcome.png")',
+    tree,
+    {},
+    {},
+  );
+  expect(instructions[1]).toEqual({
+    kind: 'builtin-assertion',
+    selectors: ['h1'],
+    target: [
+      {
+        fragments: ['welcome', 'message'].map((f) => ({
+          value: f,
+          type: 'text',
+        })),
+        key: 'welcome message',
+      },
+    ],
+    code: 'be visible',
+    args: [],
+    screenshotName: 'welcome.png',
   } satisfies BuiltInAssertion);
 });
 
@@ -137,6 +193,7 @@ test('should build an assertion with quoted text argument', () => {
     ],
     code: 'have text',
     args: ['Hello, World!'],
+    screenshotName: null,
   } satisfies AssertionInstruction);
 });
 

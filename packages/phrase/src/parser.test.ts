@@ -32,6 +32,7 @@ test('should parse a sentence with an action without target and without args', (
         },
       ],
       index: 7,
+      parenthesizedToken: null,
     } satisfies ActionStatement,
   ]);
 });
@@ -61,6 +62,7 @@ test('should parse a sentence with an action with a target and without args', ()
         },
       ],
       index: 7,
+      parenthesizedToken: null,
     } satisfies ActionStatement,
   ]);
 });
@@ -105,6 +107,7 @@ test('should parse a sentence with an action with a target and with args', () =>
         },
       ],
       index: 7,
+      parenthesizedToken: null,
     } satisfies ActionStatement,
   ]);
 });

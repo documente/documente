@@ -4,6 +4,7 @@ import {
   BuiltInAssertion,
   BuiltinAssertionCode,
   Externals,
+  Instruction,
   normalizeEOL,
   SelectorTree,
   SystemLevelInstruction,
@@ -28,6 +29,7 @@ declare const cy: {
     should: (chainer: string, ...args: string[]) => void;
     trigger: (event: string) => void;
   };
+  screenshot: (name: string, options: object) => void;
 };
 
 export class CypressRunner {
@@ -64,7 +66,7 @@ export class CypressRunner {
       this.externals,
       this.env,
     );
-    instructions.forEach((instruction) => {
+    instructions.forEach((instruction: Instruction) => {
       if (instruction.kind === 'system-level') {
         this.runSystemLevel(instruction);
       } else if (instruction.kind === 'builtin-action') {
@@ -161,6 +163,10 @@ export class CypressRunner {
       default:
         throw new Error(`Unknown action: ${action}`);
     }
+
+    if (actionInstruction.screenshotName) {
+      cy.screenshot(actionInstruction.screenshotName, { overwrite: true });
+    }
   }
 
   /**
@@ -176,17 +182,24 @@ export class CypressRunner {
     }
 
     const chainer = knownChainer[code];
-
     if (chainer == null) {
       throw new Error(`Unknown assertion code: ${code}`);
     }
 
     cy.get(selectors.join(' ')).should(chainer, ...args);
+
+    if (assertion.screenshotName) {
+      cy.screenshot(assertion.screenshotName, { overwrite: true });
+    }
   }
 
   runSystemLevel(instruction: SystemLevelInstruction) {
     const systemAction = this.externals[instruction.key];
     systemAction(...instruction.args);
+
+    if (instruction.screenshotName) {
+      cy.screenshot(instruction.screenshotName, { overwrite: true });
+    }
   }
 }
 

@@ -13,6 +13,7 @@ import {
   SystemLevelStatement,
 } from './interfaces/statements.interface';
 import { Token } from './interfaces/token.interface';
+import { isParenthesized } from './parenthesized';
 
 export class Parser {
   sentence = '';
@@ -105,6 +106,7 @@ export class Parser {
       return {
         kind: 'action-block',
         header: fullHeader.slice(3),
+        fullHeader,
         body: this.parseBullets(),
         source: this.getSource(startIndex),
       } satisfies ActionBlock;
@@ -267,9 +269,11 @@ export class Parser {
     const args = tokensBeforeShould.filter((token) => isArgument(token.value));
     return {
       kind: 'system-level',
-      tokens,
+      tokens: tokens.filter((token) => !isParenthesized(token.value)),
       args,
       index: tokens[0].index,
+      parenthesizedToken:
+        tokens.find((token) => isParenthesized(token.value)) ?? null,
     } satisfies SystemLevelStatement;
   }
 
@@ -285,9 +289,13 @@ export class Parser {
     return {
       kind: 'assertion',
       target: tokensBeforeShould,
-      assertion: tokensAfterShould,
+      assertion: tokensAfterShould.filter(
+        (token) => !isParenthesized(token.value),
+      ),
       firstToken: tokensAfterShould[0],
       index,
+      parenthesizedToken:
+        tokensAfterShould.find((token) => isParenthesized(token.value)) ?? null,
     } satisfies AssertionStatement;
   }
 
@@ -296,8 +304,10 @@ export class Parser {
 
     return {
       kind: 'action',
-      tokens,
+      tokens: tokens.filter((token) => !isParenthesized(token.value)),
       index: tokens[0].index,
+      parenthesizedToken:
+        tokens.find((token) => isParenthesized(token.value)) ?? null,
     } satisfies ActionStatement;
   }
 

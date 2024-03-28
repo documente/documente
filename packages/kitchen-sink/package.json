@@ -3,7 +3,7 @@
   "version": "1.0.0-beta.1",
   "license": "GPL-3.0",
   "scripts": {
-    "start": "npx http-server static -p 8080",
+    "start": "npx http-server static -p 8088",
     "clean": "rimraf cypress/e2e e2e",
     "documente:cypress": "documente -c documente-cypress.config.yaml",
     "documente:playwright": "documente -c documente-playwright.config.yaml",
@@ -12,7 +12,7 @@
     "playwright:open": "npx playwright test --ui",
     "playwright:run": "npx playwright test",
     "prepare-test": "npx playwright install --with-deps",
-    "wait-for-app": "wait-on http://127.0.0.1:8080",
+    "wait-for-app": "wait-on http://127.0.0.1:8088",
     "test:cypress": "run-s clean wait-for-app documente:cypress cypress:run",
     "test:playwright": "run-s clean wait-for-app documente:playwright playwright:run",
     "test:all": "run-s test:cypress test:playwright",

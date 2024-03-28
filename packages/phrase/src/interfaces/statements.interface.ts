@@ -4,6 +4,7 @@ export interface ActionStatement {
   kind: 'action';
   tokens: Token[];
   index: number;
+  parenthesizedToken: Token | null;
 }
 
 export interface AssertionStatement {
@@ -12,6 +13,7 @@ export interface AssertionStatement {
   assertion: Token[];
   firstToken: Token;
   index: number;
+  parenthesizedToken: Token | null;
 }
 
 export interface SystemLevelStatement {
@@ -19,6 +21,7 @@ export interface SystemLevelStatement {
   tokens: Token[];
   args: Token[];
   index: number;
+  parenthesizedToken: Token | null;
 }
 
 export type Statement =

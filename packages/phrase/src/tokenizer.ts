@@ -13,6 +13,7 @@ export function tokenize(sentence: string): Token[] {
   let line = 1;
   let column = 1;
   let insideDoubleQuotes = false;
+  let insideParenthesis = false;
   let isAtStartOfLine = true;
   let hasJustFinishedQuotedString = false;
   let i = 0;
@@ -54,7 +55,7 @@ export function tokenize(sentence: string): Token[] {
 
     const char = sentence[i];
 
-    if (char === ' ' && !insideDoubleQuotes) {
+    if (char === ' ' && !insideDoubleQuotes && !insideParenthesis) {
       pushToken();
       column++;
     } else if (char === '\r') {
@@ -64,11 +65,35 @@ export function tokenize(sentence: string): Token[] {
         throwError('Missing closing "');
       }
 
+      if (insideParenthesis) {
+        throwError('Missing closing parenthesis');
+      }
+
       pushToken();
       line++;
       column = 1;
       isAtStartOfLine = true;
-    } else if (char === '"') {
+    } else if (char === '(') {
+      if (insideDoubleQuotes) {
+        currentToken += char;
+        column++;
+      } else {
+        pushToken();
+        currentToken += char;
+        column++;
+        insideParenthesis = true;
+      }
+    } else if (char === ')') {
+      if (insideDoubleQuotes) {
+        currentToken += char;
+        column++;
+      } else {
+        currentToken += char;
+        column++;
+        pushToken();
+        insideParenthesis = false;
+      }
+    } else if (char === '"' && !insideParenthesis) {
       currentToken += char;
       column++;
 
