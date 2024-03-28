@@ -30,6 +30,7 @@ declare const cy: {
     trigger: (event: string) => void;
   };
   screenshot: (name: string, options: object) => void;
+  wait: (milliseconds: number) => void;
 };
 
 export class CypressRunner {
@@ -165,7 +166,7 @@ export class CypressRunner {
     }
 
     if (actionInstruction.screenshotName) {
-      cy.screenshot(actionInstruction.screenshotName, { overwrite: true });
+      saveScreenshot(actionInstruction.screenshotName);
     }
   }
 
@@ -189,7 +190,7 @@ export class CypressRunner {
     cy.get(selectors.join(' ')).should(chainer, ...args);
 
     if (assertion.screenshotName) {
-      cy.screenshot(assertion.screenshotName, { overwrite: true });
+      saveScreenshot(assertion.screenshotName);
     }
   }
 
@@ -198,9 +199,18 @@ export class CypressRunner {
     systemAction(...instruction.args);
 
     if (instruction.screenshotName) {
-      cy.screenshot(instruction.screenshotName, { overwrite: true });
+      saveScreenshot(instruction.screenshotName);
     }
   }
+}
+
+function saveScreenshot(name: string) {
+  if (name.endsWith('.png')) {
+    name = name.slice(0, -4);
+  }
+
+  cy.wait(3000);
+  cy.screenshot(name, { overwrite: true });
 }
 
 const knownChainer: Record<BuiltinAssertionCode, string> = {
