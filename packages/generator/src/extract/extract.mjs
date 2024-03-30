@@ -80,17 +80,18 @@ async function extractTestsFromSet(config, watchMode, setConfig) {
   const {
     selectors,
     externals,
-    outputDir,
+    outputFolder,
     inputFiles,
     runner,
     testRegex,
     env,
+    waitBeforeScreenshot,
   } = { ...config, ...setConfig };
 
   const outputPathToExternals =
     externals == null || externals === ''
       ? null
-      : relative(outputDir, externals).replace(/\\/g, '/');
+      : relative(outputFolder, externals).replace(/\\/g, '/');
   const selectorsFile = readAndParseYamlFile(selectors);
   const envFile = env ? readAndParseYamlFile(env) : null;
   const files = validateInputFiles(inputFiles);
@@ -105,7 +106,7 @@ async function extractTestsFromSet(config, watchMode, setConfig) {
     });
   }
 
-  fs.mkdirSync(resolve(process.cwd(), outputDir), { recursive: true });
+  fs.mkdirSync(resolve(process.cwd(), outputFolder), { recursive: true });
 
   let generatedFileCount = 0;
 
@@ -143,17 +144,22 @@ async function extractTestsFromSet(config, watchMode, setConfig) {
       sourceFileName: sourceFileName,
       specs,
       blocks,
+      waitBeforeScreenshot,
     };
 
     const rendered = Mustache.render(specTemplate, view);
     const withoutExt = parse(sourceFileName).name;
     const outputFileName = `${withoutExt}${defaultSuffix[runner]}.js`;
-    const pathToOutputFile = resolve(process.cwd(), outputDir, outputFileName);
+    const pathToOutputFile = resolve(
+      process.cwd(),
+      outputFolder,
+      outputFileName,
+    );
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     success(`Generated ${specs.length} tests in ${pathToOutputFile}.`);
     generatedFileCount++;
   });
 
-  const outputDirName = resolve(process.cwd(), outputDir);
-  success(`Generated ${generatedFileCount} spec files in ${outputDirName}.`);
+  const outputFolderName = resolve(process.cwd(), outputFolder);
+  success(`Generated ${generatedFileCount} spec files in ${outputFolderName}.`);
 }
