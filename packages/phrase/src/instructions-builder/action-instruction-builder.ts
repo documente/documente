@@ -11,12 +11,12 @@ import {
   QualifiedPatternPart,
 } from './builtin-actions';
 import { prettyPrintError } from '../error';
-import { Token } from '../interfaces/token.interface';
 import { BuildContext } from '../interfaces/build-context.interface';
 import { interpolate } from './named-arguments';
 import { unquoted } from '../quoted-text';
 import { extractTargetSelector } from './target-selector-builder';
 import { extractNamedArguments } from './named-arguments-builder';
+import { findScreenshotName } from './screenshot-utils';
 
 export function extractActionInstruction(
   actionStatement: ActionStatement,
@@ -24,7 +24,7 @@ export function extractActionInstruction(
   namedArguments: Record<string, string>,
 ): ActionInstruction {
   const block = findActionBlock(
-    actionStatement.tokens,
+    actionStatement,
     buildContext.blocks,
     buildContext,
     namedArguments,
@@ -49,6 +49,7 @@ export function extractActionInstruction(
         selectors,
         action: BuiltinActionQualifiedPatterns.get(parts)!,
         args: interpolatedArgs,
+        screenshotName: findScreenshotName(actionStatement.parenthesizedToken),
       };
     }
   }
@@ -65,7 +66,7 @@ export function extractActionInstruction(
 }
 
 function findActionBlock(
-  tokens: Token[],
+  actionStatement: ActionStatement,
   blocks: Block[],
   buildContext: BuildContext,
   namedArguments: Record<string, string>,
@@ -76,7 +77,10 @@ function findActionBlock(
         (token) => asQualifiedPart(token.value),
       );
 
-      const matchResult = getMatchResult(tokens, headerQualifiedParts);
+      const matchResult = getMatchResult(
+        actionStatement.tokens,
+        headerQualifiedParts,
+      );
 
       if (matchResult) {
         const { interpolatedArgs, selectors } = buildArgsAndSelectors(
@@ -94,7 +98,10 @@ function findActionBlock(
             block.header.map((token) => token.value),
             interpolatedArgs,
           ),
-          location: tokens[0],
+          location: actionStatement.tokens[0],
+          screenshotName: findScreenshotName(
+            actionStatement.parenthesizedToken,
+          ),
         };
       }
     }

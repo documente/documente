@@ -8,7 +8,12 @@ const selectorTree = `
 const env = {{#env}}`
 {{{.}}}`{{/env}}{{^env}}''{{/env}};
 
-const testRunner = new CypressRunner(selectorTree, {{#pathToExternals}}externals{{/pathToExternals}}{{^pathToExternals}}{}{{/pathToExternals}}, env);
+const testRunner = new CypressRunner({
+  selectorTree,
+  externals: {{#pathToExternals}}externals{{/pathToExternals}}{{^pathToExternals}}{}{{/pathToExternals}},
+  env,{{#waitBeforeScreenshot}}
+  waitBeforeScreenshot: {{.}}{{/waitBeforeScreenshot}}
+});
 
 {{#blocks}}
 testRunner.add(`

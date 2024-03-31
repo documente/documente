@@ -4,6 +4,7 @@ import { SystemLevelInstruction } from '../interfaces/instructions.interface';
 import { unquoted } from '../quoted-text';
 import { prettyPrintError } from '../error';
 import { decamelize } from '../decamelize';
+import { findScreenshotName } from './screenshot-utils';
 
 export function extractSystemLevelInstruction(
   statement: SystemLevelStatement,
@@ -22,7 +23,8 @@ export function extractSystemLevelInstruction(
         kind: 'system-level',
         key,
         args,
-      };
+        screenshotName: findScreenshotName(statement.parenthesizedToken),
+      } satisfies SystemLevelInstruction;
     }
   }
 

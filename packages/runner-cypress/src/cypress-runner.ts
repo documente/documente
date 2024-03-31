@@ -4,6 +4,7 @@ import {
   BuiltInAssertion,
   BuiltinAssertionCode,
   Externals,
+  Instruction,
   normalizeEOL,
   SelectorTree,
   SystemLevelInstruction,
@@ -28,26 +29,43 @@ declare const cy: {
     should: (chainer: string, ...args: string[]) => void;
     trigger: (event: string) => void;
   };
+  screenshot: (name: string, options: object) => void;
+  wait: (milliseconds: number) => void;
+  exec: (command: string) => void;
 };
 
-export class CypressRunner {
-  selectorTree: SelectorTree;
+interface Options {
+  selectorTree: string | SelectorTree;
   externals: Externals;
-  fragments: string[];
-  env: Record<string, string>;
+  env: string | Record<string, string>;
+  waitBeforeScreenshot: number;
+}
 
-  constructor(
-    selectorTree: string | SelectorTree,
-    externals: Externals = {},
-    env: string | Record<string, string> = {},
-  ) {
+interface ScreenshotInfo {
+  path: string;
+  name: string;
+}
+
+export class CypressRunner {
+  readonly selectorTree: SelectorTree;
+  readonly externals: Externals;
+  readonly fragments: string[];
+  readonly env: Record<string, string>;
+  readonly waitBeforeScreenshot: number;
+
+  screenshotInfos: ScreenshotInfo[] = [];
+
+  constructor(options: Options) {
     this.selectorTree =
-      typeof selectorTree === 'string'
-        ? YAML.parse(selectorTree)
-        : selectorTree;
-    this.externals = externals;
-    this.env = typeof env === 'string' ? YAML.parse(env) : env;
+      typeof options.selectorTree === 'string'
+        ? YAML.parse(options.selectorTree)
+        : options.selectorTree;
+    this.externals = options.externals;
+    this.env =
+      typeof options.env === 'string' ? YAML.parse(options.env) : options.env;
     this.fragments = [];
+    this.waitBeforeScreenshot = options.waitBeforeScreenshot;
+
     validateContext(this.selectorTree, this.externals);
   }
 
@@ -64,7 +82,7 @@ export class CypressRunner {
       this.externals,
       this.env,
     );
-    instructions.forEach((instruction) => {
+    instructions.forEach((instruction: Instruction) => {
       if (instruction.kind === 'system-level') {
         this.runSystemLevel(instruction);
       } else if (instruction.kind === 'builtin-action') {
@@ -82,7 +100,10 @@ export class CypressRunner {
    * @returns {boolean} True if the target is defined, false otherwise.
    * @throws {Error} If the target is not defined.
    */
-  targetIsDefined(target: string[] | null, action: string): target is string[] {
+  private targetIsDefined(
+    target: string[] | null,
+    action: string,
+  ): target is string[] {
     if (!target) {
       throw new Error(`Target is required for action ${action}.`);
     }
@@ -94,7 +115,7 @@ export class CypressRunner {
    * Runs an action.
    * @param {Object} actionInstruction - The action instruction.
    */
-  runAction(actionInstruction: BuiltInActionInstruction) {
+  private runAction(actionInstruction: BuiltInActionInstruction) {
     const { selectors, action, args } = actionInstruction;
 
     switch (action) {
@@ -161,6 +182,10 @@ export class CypressRunner {
       default:
         throw new Error(`Unknown action: ${action}`);
     }
+
+    if (actionInstruction.screenshotName) {
+      this.saveScreenshot(actionInstruction.screenshotName);
+    }
   }
 
   /**
@@ -168,7 +193,7 @@ export class CypressRunner {
    * @param {Object} assertion - The assertion.
    * @throws {Error} If the target selectors are not defined or the assertion is unknown.
    */
-  runBuiltInAssertion(assertion: BuiltInAssertion) {
+  private runBuiltInAssertion(assertion: BuiltInAssertion) {
     const { selectors, args, code } = assertion;
 
     if (!selectors) {
@@ -176,17 +201,38 @@ export class CypressRunner {
     }
 
     const chainer = knownChainer[code];
-
     if (chainer == null) {
       throw new Error(`Unknown assertion code: ${code}`);
     }
 
     cy.get(selectors.join(' ')).should(chainer, ...args);
+
+    if (assertion.screenshotName) {
+      this.saveScreenshot(assertion.screenshotName);
+    }
   }
 
-  runSystemLevel(instruction: SystemLevelInstruction) {
+  private runSystemLevel(instruction: SystemLevelInstruction) {
     const systemAction = this.externals[instruction.key];
     systemAction(...instruction.args);
+
+    if (instruction.screenshotName) {
+      this.saveScreenshot(instruction.screenshotName);
+    }
+  }
+
+  private saveScreenshot(name: string) {
+    if (name.endsWith('.png')) {
+      name = name.slice(0, -4);
+    }
+
+    if (this.waitBeforeScreenshot) {
+      cy.wait(this.waitBeforeScreenshot);
+    }
+
+    cy.screenshot(name, {
+      overwrite: true,
+    });
   }
 }
 

@@ -25,7 +25,7 @@ export async function promptConfig(baseConfig, yesToAll, hasConfigFile) {
         answers[optionKey] = baseValue;
         continue;
       } else {
-        warn('Invalid value for', optionKey, 'in config file.');
+        warn(`Invalid value for ${optionKey} in config file.`);
 
         if (yesToAll) {
           throw new Error('Invalid config file');
@@ -118,6 +118,8 @@ function isValidValue(optionKey, value) {
     case 'string':
     case 'filepath':
       return typeof value === 'string';
+    case 'number':
+      return typeof value === 'number';
     default:
       throw new Error(`Invalid option type: ${option.type}`);
   }

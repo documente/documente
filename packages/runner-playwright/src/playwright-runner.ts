@@ -132,6 +132,10 @@ export class PlaywrightRunner {
       default:
         throw new Error(`Unknown action: ${action}`);
     }
+
+    if (actionInstruction.screenshotName) {
+      await page.screenshot({ path: actionInstruction.screenshotName });
+    }
   }
 
   async runBuiltInAssertion(
@@ -189,6 +193,10 @@ export class PlaywrightRunner {
         break;
       default:
         throw new Error(`Unknown assertion code: ${code}`);
+    }
+
+    if (assertion.screenshotName) {
+      await page.screenshot({ path: assertion.screenshotName });
     }
   }
 

@@ -17,6 +17,7 @@ import {
 } from './builtin-assertions';
 import { TargetSelector } from '../interfaces/target-selector.interface';
 import { isArgument } from '../arguments';
+import { findScreenshotName } from './screenshot-utils';
 
 export function extractAssertionInstruction(
   statement: AssertionStatement,
@@ -118,6 +119,7 @@ function findAssertionBlock(
             interpolatedArgs,
           ),
           location: statement.firstToken,
+          screenshotName: findScreenshotName(statement.parenthesizedToken),
         };
       }
     }
@@ -148,6 +150,7 @@ function findBuiltinAssertion(
         ) as BuiltinAssertionCode,
         selectors: targetSelector?.selectors ?? null,
         target: targetSelector?.path ?? null,
+        screenshotName: findScreenshotName(assertion.parenthesizedToken),
       };
     }
   }

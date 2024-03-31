@@ -8,11 +8,12 @@ const DEFAULT_REGEX = '```phras[ée]([^`]*)```';
 export const OPTION_KEYS = [
   'runner',
   'inputFiles',
-  'outputDir',
+  'outputFolder',
   'selectors',
   'externals',
   'testRegex',
   'env',
+  'waitBeforeScreenshot',
 ];
 
 export const CLI_OPTIONS = {
@@ -30,7 +31,7 @@ export const CLI_OPTIONS = {
     promptMessage: 'What files would you like to extract tests from?',
     defaultValue: '**/*.md',
   },
-  outputDir: {
+  outputFolder: {
     description: 'Path to a directory to output the generated tests',
     type: 'string',
     defaultValueFn: (options) => {
@@ -61,5 +62,12 @@ export const CLI_OPTIONS = {
     description: 'Path to a YAML file containing environment variables',
     type: 'filepath',
     promptMessage: 'What file contains your environment variables?',
+  },
+  waitBeforeScreenshot: {
+    description: 'Number of milliseconds to wait before taking a screenshot',
+    type: 'number',
+    promptMessage:
+      'How long should we wait before taking a screenshot? (milliseconds)',
+    defaultValue: 0,
   },
 };

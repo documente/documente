@@ -17,6 +17,7 @@ interface BaseActionInstruction {
   kind: string;
   selectors: string[] | null;
   args: string[];
+  screenshotName: string | null;
 }
 
 export interface BuiltInActionInstruction extends BaseActionInstruction {
@@ -40,6 +41,7 @@ interface BaseAssertionInstruction {
   target: ResolvedTarget[] | null;
   selectors: string[] | null;
   args: string[];
+  screenshotName: string | null;
 }
 
 export interface BuiltInAssertion extends BaseAssertionInstruction {
@@ -60,6 +62,7 @@ export interface SystemLevelInstruction {
   kind: 'system-level';
   key: string;
   args: string[];
+  screenshotName: string | null;
 }
 
 export type Instruction =
