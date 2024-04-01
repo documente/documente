@@ -5,7 +5,7 @@ import { globSync as glob } from 'glob';
 import Mustache from 'mustache';
 import { Splitter } from '@documente/phrase';
 import { fileURLToPath } from 'node:url';
-import { success, warn } from './logger.mjs';
+import { info, success, warn } from './logger.mjs';
 import { watchFiles } from './watch.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -60,21 +60,59 @@ function validateInputFiles(inputGlobArray) {
   return files;
 }
 
+function validateSetNames(sets) {
+  const setNames = new Set();
+
+  for (const set of sets) {
+    if (set.name == null) {
+      continue;
+    }
+
+    if (typeof set.name !== 'string') {
+      throw new Error(`Set name "${set.name}" must be a string.`);
+    }
+
+    if (set.name === '') {
+      throw new Error('Set name cannot be an empty string.');
+    }
+
+    if (startsWithADigit(set.name)) {
+      throw new Error(`Set name "${set.name}" cannot start with a digit.`);
+    }
+
+    if (setNames.has(set.name)) {
+      throw new Error(`Set name "${set.name}" is not unique.`);
+    }
+
+    setNames.add(set.name);
+  }
+}
+
+function startsWithADigit(name) {
+  return /^\d/.test(name);
+}
+
 export async function extractTests(config, watchMode) {
   if (config.sets) {
     if (!Array.isArray(config.sets)) {
       throw new Error('sets must be an Array.');
     }
 
+    validateSetNames(config.sets);
+
+    let setIndex = 0;
+
     for (const set of config.sets) {
-      await extractTestsFromSet(config, watchMode, set);
+      info(`Extracting tests from set ${setIndex}.`);
+      await extractTestsFromSet(config, watchMode, set, setIndex);
+      setIndex++;
     }
   } else {
     await extractTestsFromSet(config, watchMode, null);
   }
 }
 
-async function extractTestsFromSet(config, watchMode, setConfig) {
+async function extractTestsFromSet(config, watchMode, setConfig, setIndex) {
   setConfig = setConfig ?? {};
 
   const {
@@ -86,6 +124,7 @@ async function extractTestsFromSet(config, watchMode, setConfig) {
     testRegex,
     env,
     waitBeforeScreenshot,
+    name,
   } = { ...config, ...setConfig };
 
   const outputPathToExternals =
@@ -106,13 +145,25 @@ async function extractTestsFromSet(config, watchMode, setConfig) {
     });
   }
 
-  fs.mkdirSync(resolve(process.cwd(), outputFolder), { recursive: true });
-
   let generatedFileCount = 0;
+
+  const buildPathToOutputFile = (dirName, outputFileName) => {
+    return setIndex == null
+      ? resolve(process.cwd(), outputFolder, dirName, outputFileName)
+      : resolve(
+          process.cwd(),
+          outputFolder,
+          name ?? setIndex.toString(),
+          dirName,
+          outputFileName,
+        );
+  };
 
   files.forEach((file) => {
     const splitter = new Splitter();
     const sourceFileName = basename(file);
+    const dirName = dirname(file);
+
     const fileContent = fs.readFileSync(resolve(process.cwd(), file), 'utf8');
     const regex = new RegExp(testRegex, 'gm');
     const matches = fileContent.match(regex);
@@ -150,11 +201,13 @@ async function extractTestsFromSet(config, watchMode, setConfig) {
     const rendered = Mustache.render(specTemplate, view);
     const withoutExt = parse(sourceFileName).name;
     const outputFileName = `${withoutExt}${defaultSuffix[runner]}.js`;
-    const pathToOutputFile = resolve(
-      process.cwd(),
-      outputFolder,
-      outputFileName,
-    );
+    const pathToOutputFile = buildPathToOutputFile(dirName, outputFileName);
+
+    const directory = dirname(pathToOutputFile);
+    if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory, { recursive: true });
+    }
+
     fs.writeFileSync(pathToOutputFile, rendered, 'utf8');
     success(`Generated ${specs.length} tests in ${pathToOutputFile}.`);
     generatedFileCount++;
