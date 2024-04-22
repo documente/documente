@@ -70,4 +70,11 @@ export const CLI_OPTIONS = {
       'How long should we wait before taking a screenshot? (milliseconds)',
     defaultValue: 0,
   },
+  acceptLanguages: {
+    description: 'Valid languages for the accept-language header',
+    type: 'string',
+    promptMessage:
+      'What languages should we use for the accept-language header?',
+    defaultValue: '',
+  },
 };

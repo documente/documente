@@ -12,7 +12,8 @@ const testRunner = new CypressRunner({
   selectorTree,
   externals: {{#pathToExternals}}externals{{/pathToExternals}}{{^pathToExternals}}{}{{/pathToExternals}},
   env,{{#waitBeforeScreenshot}}
-  waitBeforeScreenshot: {{.}}{{/waitBeforeScreenshot}}
+  waitBeforeScreenshot: {{.}}{{/waitBeforeScreenshot}},{{#acceptLanguages}}
+  acceptLanguages: '{{.}}',{{/acceptLanguages}}
 });
 
 {{#blocks}}

@@ -125,6 +125,7 @@ async function extractTestsFromSet(config, watchMode, setConfig, setIndex) {
     env,
     waitBeforeScreenshot,
     name,
+    acceptLanguages,
   } = { ...config, ...setConfig };
 
   const outputPathToExternals =
@@ -193,6 +194,7 @@ async function extractTestsFromSet(config, watchMode, setConfig, setIndex) {
       selectorTree: selectorsFile,
       env: envFile,
       sourceFileName: sourceFileName,
+      acceptLanguages,
       specs,
       blocks,
       waitBeforeScreenshot,

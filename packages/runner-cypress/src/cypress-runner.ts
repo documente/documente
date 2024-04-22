@@ -14,7 +14,7 @@ import YAML from 'yaml';
 
 // TODO: include actual types from cypress without importing the whole package
 declare const cy: {
-  visit: (url: string) => void;
+  visit: (url: string, options?: object) => void;
   go: (direction: 'back' | 'forward') => void;
   get: (selector: string) => {
     type: (text: string) => void;
@@ -39,6 +39,7 @@ interface Options {
   externals: Externals;
   env: string | Record<string, string>;
   waitBeforeScreenshot: number;
+  acceptLanguages: string;
 }
 
 interface ScreenshotInfo {
@@ -52,6 +53,7 @@ export class CypressRunner {
   readonly fragments: string[];
   readonly env: Record<string, string>;
   readonly waitBeforeScreenshot: number;
+  readonly acceptLanguages: string;
 
   screenshotInfos: ScreenshotInfo[] = [];
 
@@ -65,6 +67,7 @@ export class CypressRunner {
       typeof options.env === 'string' ? YAML.parse(options.env) : options.env;
     this.fragments = [];
     this.waitBeforeScreenshot = options.waitBeforeScreenshot;
+    this.acceptLanguages = options.acceptLanguages;
 
     validateContext(this.selectorTree, this.externals);
   }
@@ -130,7 +133,7 @@ export class CypressRunner {
         }
         break;
       case 'visit':
-        cy.visit(args[0]);
+        cy.visit(args[0], this.getVisitOptions());
         break;
       case 'check':
         if (this.targetIsDefined(selectors, action)) {
@@ -185,6 +188,24 @@ export class CypressRunner {
 
     if (actionInstruction.screenshotName) {
       this.saveScreenshot(actionInstruction.screenshotName);
+    }
+  }
+
+  private getVisitOptions() {
+    if (this.acceptLanguages) {
+      return {
+        onBeforeLoad: (win: any) => {
+          Object.defineProperty(win.navigator, 'languages', {
+            value: this.acceptLanguages.split(';'),
+          });
+          Object.defineProperty(win.navigator, 'accept_languages', {
+            value: this.acceptLanguages.split(';'),
+          });
+        },
+        headers: {
+          'Accept-Language': this.acceptLanguages,
+        },
+      };
     }
   }
 
