@@ -10,7 +10,18 @@
 The Javascript literate testing framework
 </p>
 
-> Visit [Documenté's website](https://documente.github.io) for an overview of the framework!
+> 📢 Documente is now [Spequoia](https://github.com/spequoia)!
+>
+> This repository has been archived.
+> Our original idea — human-readable automated tests integrated into documentation — has evolved into something broader and more powerful.
+> 
+> Spequoia is a new specification format that enables:
+> - UI mockups
+> - Automated tests
+> - Interactive documentation — all from the same spec.
+> 
+> We’d love for you to join us on the next stage of the journey.
+> 👉 [Check out the new project](https://github.com/spequoia)
 
 ## Repository overview
 
